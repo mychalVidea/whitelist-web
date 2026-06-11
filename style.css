@@ -836,6 +836,165 @@ h2 {
     color: var(--error-color);
 }
 
+/* Interactive Tutorial Styling */
+.tutorial-container {
+    width: 100%;
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 18px;
+    padding: 20px;
+    text-align: left;
+    animation: slideDown 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes slideDown {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.tutorial-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-btn.active {
+    color: var(--bg-dark);
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.tutorial-content {
+    min-height: 150px;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeInTab 0.3s ease-in-out forwards;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeInTab {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.tab-pane h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+.tab-pane p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 14px;
+}
+
+.tutorial-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.t-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 183, 3, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.tutorial-tip {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--discord-color);
+    padding: 10px 12px;
+    border-radius: 4px 8px 8px 4px;
+    font-size: 12px !important;
+}
+
+/* Commands display grid */
+.commands-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.cmd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.cmd-row:last-child {
+    border-bottom: none;
+}
+
+.cmd-row strong {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.cmd-row span {
+    color: var(--text-secondary);
+}
+
+.btn-map-link {
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.15);
+}
+
 /* Responsive fixes */
 @media (max-width: 480px) {
     .app-container {
@@ -855,5 +1014,9 @@ h2 {
     }
     .rule-item {
         font-size: 12.5px;
+    }
+    .tutorial-tabs {
+        flex-direction: column;
+        gap: 6px;
     }
 }

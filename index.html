@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +8,18 @@
     <meta name="description" content="Přidej se na MYCHAL SMP Minecraft server! Automatický whitelist přes Discord.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
 </head>
+
 <body>
     <!-- Particle canvas -->
     <canvas id="particles"></canvas>
-    
+
     <!-- Ambient glow orbs -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -69,14 +74,19 @@
                 <div class="card-content">
                     <div class="step-icon">
                         <svg width="64" height="64" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z" fill="#5865F2"/>
+                            <path
+                                d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z"
+                                fill="#5865F2" />
                         </svg>
                     </div>
                     <h2>Přihlásit se přes Discord</h2>
-                    <p class="card-desc">Pro registraci na whitelist se potřebuješ přihlásit přes Discord. Ověříme, že jsi na našem serveru.</p>
+                    <p class="card-desc">Pro registraci na whitelist se potřebuješ přihlásit přes Discord. Ověříme, že
+                        jsi na našem serveru.</p>
                     <button class="btn btn-discord" id="btn-discord-login" onclick="startDiscordLogin()">
-                        <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z"/>
+                        <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z" />
                         </svg>
                         Přihlásit se přes Discord
                     </button>
@@ -103,14 +113,18 @@
                             <div class="mc-head-placeholder" id="mc-head-placeholder">?</div>
                         </div>
                         <div class="input-wrapper">
-                            <input type="text" id="mc-nick-input" placeholder="Tvůj Minecraft nick" maxlength="16" autocomplete="off" spellcheck="false">
+                            <input type="text" id="mc-nick-input" placeholder="Tvůj Minecraft nick" maxlength="16"
+                                autocomplete="off" spellcheck="false">
                             <div class="input-underline"></div>
                         </div>
                     </div>
                     <p class="nick-validation" id="nick-validation"></p>
                     <button class="btn btn-primary" id="btn-submit-nick" onclick="submitNick()" disabled>
                         Pokračovat
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
             </section>
@@ -125,17 +139,25 @@
                     <div class="rules-list">
                         <!-- Firefly guide element -->
                         <div class="rules-firefly" id="rules-firefly"></div>
-                        <div class="rule-item" data-rule="1"><span class="rule-icon">🚫</span><span>Necheatuj! Jakékoliv cheaty = permanentní ban.</span></div>
-                        <div class="rule-item" data-rule="2"><span class="rule-icon">💎</span><span>Žádný X-Ray – ani texture packy, ani mody.</span></div>
-                        <div class="rule-item" data-rule="3"><span class="rule-icon">🏠</span><span>Zákaz griefování světa a okolí hráčovských rezidencí.</span></div>
-                        <div class="rule-item" data-rule="4"><span class="rule-icon">💬</span><span>Zákaz spamování v chatu.</span></div>
-                        <div class="rule-item" data-rule="5"><span class="rule-icon">🤬</span><span>Zákaz sprostých slov a toxického chování.</span></div>
+                        <div class="rule-item" data-rule="1"><span class="rule-icon">🚫</span><span>Necheatuj! Jakékoliv
+                                cheaty = permanentní ban.</span></div>
+                        <div class="rule-item" data-rule="2"><span class="rule-icon">💎</span><span>Žádný X-Ray – ani
+                                texture packy, ani mody.</span></div>
+                        <div class="rule-item" data-rule="3"><span class="rule-icon">🏠</span><span>Zákaz griefování
+                                světa a okolí hráčovských rezidencí.</span></div>
+                        <div class="rule-item" data-rule="4"><span class="rule-icon">💬</span><span>Zákaz spamování v
+                                chatu.</span></div>
+                        <div class="rule-item" data-rule="5"><span class="rule-icon">🤬</span><span>Zákaz sprostých slov
+                                a toxického chování.</span></div>
                     </div>
                     <div class="rules-timer" id="rules-timer">
                         <div class="timer-ring">
                             <svg viewBox="0 0 36 36">
-                                <path class="timer-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="timer-fill" id="timer-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"/>
+                                <path class="timer-bg"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="timer-fill" id="timer-fill"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    stroke-dasharray="0, 100" />
                             </svg>
                             <span class="timer-text" id="timer-text">10</span>
                         </div>
@@ -176,7 +198,8 @@
                             <span class="verify-status"></span>
                         </div>
                     </div>
-                    <button class="btn btn-secondary" id="btn-verify-retry" style="display:none; margin-top:20px;" onclick="resetApp()">Zkusit znovu</button>
+                    <button class="btn btn-secondary" id="btn-verify-retry" style="display:none; margin-top:20px;"
+                        onclick="resetApp()">Zkusit znovu</button>
                 </div>
             </section>
 
@@ -190,7 +213,8 @@
                     <div class="server-info" id="server-info">
                         <div class="info-row">
                             <span class="info-label">📡 IP adresa</span>
-                            <span class="info-value copyable" onclick="copyToClipboard('mychalsmp.feathermc.gg', this)" id="server-ip">mychalsmp.feathermc.gg</span>
+                            <span class="info-value copyable" onclick="copyToClipboard('mychalsmp.feathermc.gg', this)"
+                                id="server-ip">mychalsmp.feathermc.gg</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">🎮 Verze</span>
@@ -201,7 +225,63 @@
                             <span class="info-value">25565 (výchozí)</span>
                         </div>
                     </div>
-                    <p class="success-hint" id="success-hint">Klikni na IP adresu pro zkopírování. Uvidíme se ve hře! 🎉</p>
+                    <p class="success-hint" id="success-hint">Klikni na IP adresu pro zkopírování. Uvidíme se ve hře! 🎉
+                    </p>
+                    <button class="btn btn-secondary" id="btn-learn-more" style="margin-top: 15px;"
+                        onclick="toggleTutorial()">Dozvědět se více (Jak hrát?) 📖</button>
+
+                    <!-- Interactive Tutorial -->
+                    <div class="tutorial-container" id="tutorial-container" style="display: none;">
+                        <div class="tutorial-tabs">
+                            <button class="tab-btn active" onclick="switchTab('claim')">🏠 Rezidence</button>
+                            <button class="tab-btn" onclick="switchTab('commands')">⚙️ Příkazy</button>
+                            <button class="tab-btn" onclick="switchTab('map')">🗺️ Mapa</button>
+                        </div>
+                        <div class="tutorial-content">
+                            <div class="tab-pane active" id="pane-claim">
+                                <h3>🏠 Jak chránit svůj majetek?</h3>
+                                <p>Pro vytvoření ochrany území (claimu) proti griefování použij <strong>Zlatou
+                                        lopatu</strong>:</p>
+                                <div class="tutorial-steps">
+                                    <div class="t-step"><span class="step-num">1</span> Klikni pravým tlačítkem se
+                                        zlatou lopatou do jednoho rohu tvého budoucího pozemku.</div>
+                                    <div class="t-step"><span class="step-num">2</span> Běž do protějšího rohu a opět
+                                        klikni pravým tlačítkem na zem.</div>
+                                    <div class="t-step"><span class="step-num">3</span> Rohy se označí glowstone blocky
+                                        a tvé území je chráněno!</div>
+                                </div>
+                                <p class="tutorial-tip">💡 <strong>Tip:</strong> Zlatou lopatu a tyčku (na zjištění info
+                                    o claimu) získáš automaticky po vytvoření první truhly nebo napsáním příkazu do
+                                    chatu.</p>
+                            </div>
+                            <div class="tab-pane" id="pane-commands">
+                                <h3>⚙️ Důležité příkazy na serveru</h3>
+                                <div class="commands-grid">
+                                    <div class="cmd-row"><strong>/sethome [název]</strong> <span>Uloží tvou pozici jako
+                                            domov</span></div>
+                                    <div class="cmd-row"><strong>/home [název]</strong> <span>Teleportuje tě domů</span>
+                                    </div>
+                                    <div class="cmd-row"><strong>/tpa [nick]</strong> <span>Pošle žádost o port k
+                                            hráči</span></div>
+                                    <div class="cmd-row"><strong>/trade [nick]</strong> <span>Pošleš žádost o
+                                            obchodování určitému hráči.</span></div>
+                                    <div class="cmd-row"><strong>/rtp</strong> <span>Teleportuje tě do
+                                            připraveného lesa.</span></div>
+                                    <div class="cmd-row"><strong>/rules</strong> <span>Zobrazí pravidla serveru</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="pane-map">
+                                <h3>🗺️ Online mapa světa</h3>
+                                <p>Sleduj v reálném čase, kde se zrovna nacházíš ty i ostatní hráči na naší
+                                    mapě!</p>
+                                <a href="https://map.6767111.xyz" target="_blank" class="btn btn-primary btn-map-link"
+                                    style="margin-top: 15px;">
+                                    Otevřít mapu (map.6767111.xyz) 🌐
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -223,8 +303,10 @@
     </div>
 
     <!-- Confetti canvas -->
-    <canvas id="confetti" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+    <canvas id="confetti"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
 
     <script src="script.js"></script>
 </body>
+
 </html>

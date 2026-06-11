@@ -592,3 +592,45 @@ function resetApp() {
     }
 }
 
+// Toggle tutorial visibility
+function toggleTutorial() {
+    const container = document.getElementById('tutorial-container');
+    const btn = document.getElementById('btn-learn-more');
+    if (!container || !btn) return;
+
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.textContent = 'Skrýt návod 📖';
+        
+        // Scroll to the tutorial container smoothly
+        setTimeout(() => {
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    } else {
+        container.style.display = 'none';
+        btn.textContent = 'Dozvědět se více (Jak hrát?) 📖';
+    }
+}
+
+// Switch active tab in tutorial
+function switchTab(tabId) {
+    // Update tab button classes
+    const tabs = document.querySelectorAll('.tutorial-tabs .tab-btn');
+    tabs.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Update tab pane visibility
+    const panes = document.querySelectorAll('.tutorial-content .tab-pane');
+    panes.forEach(pane => {
+        if (pane.id === `pane-${tabId}`) {
+            pane.classList.add('active');
+        } else {
+            pane.classList.remove('active');
+        }
+    });
+}
