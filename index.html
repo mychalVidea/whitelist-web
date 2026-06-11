@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYCHAL SMP – Whitelist</title>
+    <meta name="description" content="Přidej se na MYCHAL SMP Minecraft server! Automatický whitelist přes Discord.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
+</head>
+<body>
+    <!-- Particle canvas -->
+    <canvas id="particles"></canvas>
+    
+    <!-- Ambient glow orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">⛏️</span>
+                <div class="logo-text">
+                    <h1>MYCHAL <span class="accent">SMP</span></h1>
+                    <p class="subtitle">Whitelist registrace</p>
+                </div>
+            </div>
+            <div class="server-badge">
+                <span class="badge-dot"></span>
+                <span>Java 26.1.2</span>
+            </div>
+        </header>
+
+        <!-- Progress bar -->
+        <div class="progress-container" id="progress-container">
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <span>Discord</span>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <span>Minecraft</span>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <span>Pravidla</span>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <span>Hotovo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step panels -->
+        <main class="card-container">
+            <!-- Step 1: Discord Login -->
+            <section class="card active" id="step-1">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="step-icon">
+                        <svg width="64" height="64" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z" fill="#5865F2"/>
+                        </svg>
+                    </div>
+                    <h2>Přihlásit se přes Discord</h2>
+                    <p class="card-desc">Pro registraci na whitelist se potřebuješ přihlásit přes Discord. Ověříme, že jsi na našem serveru.</p>
+                    <button class="btn btn-discord" id="btn-discord-login" onclick="startDiscordLogin()">
+                        <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z"/>
+                        </svg>
+                        Přihlásit se přes Discord
+                    </button>
+                    <p class="hint">🔒 Tvé údaje jsou v bezpečí. Získáváme jen tvé jméno.</p>
+                </div>
+            </section>
+
+            <!-- Step 2: Minecraft Nick -->
+            <section class="card" id="step-2">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="discord-user-info" id="discord-user-info">
+                        <img id="discord-avatar" src="" alt="avatar" class="discord-avatar">
+                        <div>
+                            <span class="discord-name" id="discord-name"></span>
+                            <span class="discord-verified">✅ Ověřený člen</span>
+                        </div>
+                    </div>
+                    <h2>Zadej svůj Minecraft nick</h2>
+                    <p class="card-desc">Nick musí být přesně takový, jaký používáš v Minecraftu (3–16 znaků).</p>
+                    <div class="nick-input-group">
+                        <div class="mc-head-preview" id="mc-head-preview">
+                            <img id="mc-head-img" src="" alt="MC head" style="display:none;">
+                            <div class="mc-head-placeholder" id="mc-head-placeholder">?</div>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" id="mc-nick-input" placeholder="Tvůj Minecraft nick" maxlength="16" autocomplete="off" spellcheck="false">
+                            <div class="input-underline"></div>
+                        </div>
+                    </div>
+                    <p class="nick-validation" id="nick-validation"></p>
+                    <button class="btn btn-primary" id="btn-submit-nick" onclick="submitNick()" disabled>
+                        Pokračovat
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Step 3: Rules -->
+            <section class="card" id="step-3">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="step-icon rules-icon">📜</div>
+                    <h2>Pravidla serveru</h2>
+                    <p class="card-desc">Přečti si pravidla a přijmi je. Jejich porušení = ban.</p>
+                    <div class="rules-list">
+                        <div class="rule-item"><span class="rule-icon">🚫</span><span>Necheatuj! Jakékoliv cheaty = permanentní ban.</span></div>
+                        <div class="rule-item"><span class="rule-icon">💎</span><span>Žádný X-Ray – ani texture packy, ani mody.</span></div>
+                        <div class="rule-item"><span class="rule-icon">🏠</span><span>Zákaz griefování světa a okolí hráčovských rezidencí.</span></div>
+                        <div class="rule-item"><span class="rule-icon">💬</span><span>Zákaz spamování v chatu.</span></div>
+                        <div class="rule-item"><span class="rule-icon">🤬</span><span>Zákaz sprostých slov a toxického chování.</span></div>
+                    </div>
+                    <div class="rules-timer" id="rules-timer">
+                        <div class="timer-ring">
+                            <svg viewBox="0 0 36 36">
+                                <path class="timer-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="timer-fill" id="timer-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"/>
+                            </svg>
+                            <span class="timer-text" id="timer-text">5</span>
+                        </div>
+                        <span class="timer-label">Přečti si pravidla...</span>
+                    </div>
+                    <button class="btn btn-primary btn-accept" id="btn-accept-rules" onclick="acceptRules()" disabled>
+                        <span class="btn-lock" id="btn-lock">🔒</span>
+                        Přijímám pravidla
+                    </button>
+                </div>
+            </section>
+
+            <!-- Step 4: Verification animation -->
+            <section class="card" id="step-4">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="step-icon verify-icon">⚡</div>
+                    <h2>Ověřuji a přidávám...</h2>
+                    <div class="verify-steps" id="verify-steps">
+                        <div class="verify-step" id="vs-1">
+                            <div class="verify-spinner"></div>
+                            <span class="verify-label">Ověřuji Discord účet</span>
+                            <span class="verify-status"></span>
+                        </div>
+                        <div class="verify-step" id="vs-2">
+                            <div class="verify-spinner"></div>
+                            <span class="verify-label">Kontroluji členství na serveru</span>
+                            <span class="verify-status"></span>
+                        </div>
+                        <div class="verify-step" id="vs-3">
+                            <div class="verify-spinner"></div>
+                            <span class="verify-label">Kontroluji whitelist</span>
+                            <span class="verify-status"></span>
+                        </div>
+                        <div class="verify-step" id="vs-4">
+                            <div class="verify-spinner"></div>
+                            <span class="verify-label">Přidávám na whitelist</span>
+                            <span class="verify-status"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 5: Success -->
+            <section class="card" id="step-5">
+                <div class="card-glow success-glow"></div>
+                <div class="card-content">
+                    <div class="success-icon" id="result-icon">✅</div>
+                    <h2 id="result-title">Vítej na serveru!</h2>
+                    <p class="card-desc" id="result-desc">Tvůj nick byl úspěšně přidán na whitelist.</p>
+                    <div class="server-info" id="server-info">
+                        <div class="info-row">
+                            <span class="info-label">📡 IP adresa</span>
+                            <span class="info-value copyable" onclick="copyToClipboard('mychalsmp.feathermc.gg', this)" id="server-ip">mychalsmp.feathermc.gg</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🎮 Verze</span>
+                            <span class="info-value">Java 26.1.2</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🔌 Port</span>
+                            <span class="info-value">25565 (výchozí)</span>
+                        </div>
+                    </div>
+                    <p class="success-hint" id="success-hint">Klikni na IP adresu pro zkopírování. Uvidíme se ve hře! 🎉</p>
+                </div>
+            </section>
+
+            <!-- Error state -->
+            <section class="card" id="step-error" style="display:none;">
+                <div class="card-glow error-glow"></div>
+                <div class="card-content">
+                    <div class="error-icon">❌</div>
+                    <h2 id="error-title">Něco se nepovedlo</h2>
+                    <p class="card-desc" id="error-desc"></p>
+                    <button class="btn btn-secondary" onclick="resetApp()">Zkusit znovu</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>MYCHAL SMP &copy; 2026 • Vytvořeno s ❤️ a ⛏️ by Aiko</p>
+        </footer>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confetti" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>
