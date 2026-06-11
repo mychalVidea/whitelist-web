@@ -758,6 +758,84 @@ h2 {
     font-weight: 500;
 }
 
+/* Firefly guide styles */
+.rules-list {
+    position: relative;
+    overflow: hidden;
+}
+
+.rules-firefly {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px 4px var(--accent-glow), 0 0 4px 1px #fff;
+    left: -20px;
+    top: 0;
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0;
+    z-index: 10;
+}
+
+.rule-item {
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.rule-item.active {
+    background: rgba(255, 183, 3, 0.08);
+    transform: translateX(5px);
+    border-left: 3px solid var(--accent);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.rule-item.active span {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Card Transitions */
+.card {
+    display: none;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.card.fade-out {
+    opacity: 0;
+    transform: translateY(-15px);
+}
+
+.card.fade-in {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Red cross styling for failed verify step */
+.verify-step.failed {
+    opacity: 1;
+}
+
+.verify-step.failed .verify-status {
+    color: var(--error-color);
+    text-shadow: 0 0 8px var(--error-glow);
+}
+
+.verify-step.failed .verify-label {
+    color: var(--error-color);
+}
+
 /* Responsive fixes */
 @media (max-width: 480px) {
     .app-container {

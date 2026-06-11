@@ -123,11 +123,13 @@
                     <h2>Pravidla serveru</h2>
                     <p class="card-desc">Přečti si pravidla a přijmi je. Jejich porušení = ban.</p>
                     <div class="rules-list">
-                        <div class="rule-item"><span class="rule-icon">🚫</span><span>Necheatuj! Jakékoliv cheaty = permanentní ban.</span></div>
-                        <div class="rule-item"><span class="rule-icon">💎</span><span>Žádný X-Ray – ani texture packy, ani mody.</span></div>
-                        <div class="rule-item"><span class="rule-icon">🏠</span><span>Zákaz griefování světa a okolí hráčovských rezidencí.</span></div>
-                        <div class="rule-item"><span class="rule-icon">💬</span><span>Zákaz spamování v chatu.</span></div>
-                        <div class="rule-item"><span class="rule-icon">🤬</span><span>Zákaz sprostých slov a toxického chování.</span></div>
+                        <!-- Firefly guide element -->
+                        <div class="rules-firefly" id="rules-firefly"></div>
+                        <div class="rule-item" data-rule="1"><span class="rule-icon">🚫</span><span>Necheatuj! Jakékoliv cheaty = permanentní ban.</span></div>
+                        <div class="rule-item" data-rule="2"><span class="rule-icon">💎</span><span>Žádný X-Ray – ani texture packy, ani mody.</span></div>
+                        <div class="rule-item" data-rule="3"><span class="rule-icon">🏠</span><span>Zákaz griefování světa a okolí hráčovských rezidencí.</span></div>
+                        <div class="rule-item" data-rule="4"><span class="rule-icon">💬</span><span>Zákaz spamování v chatu.</span></div>
+                        <div class="rule-item" data-rule="5"><span class="rule-icon">🤬</span><span>Zákaz sprostých slov a toxického chování.</span></div>
                     </div>
                     <div class="rules-timer" id="rules-timer">
                         <div class="timer-ring">
@@ -135,7 +137,7 @@
                                 <path class="timer-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                                 <path class="timer-fill" id="timer-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"/>
                             </svg>
-                            <span class="timer-text" id="timer-text">5</span>
+                            <span class="timer-text" id="timer-text">10</span>
                         </div>
                         <span class="timer-label">Přečti si pravidla...</span>
                     </div>
@@ -174,6 +176,7 @@
                             <span class="verify-status"></span>
                         </div>
                     </div>
+                    <button class="btn btn-secondary" id="btn-verify-retry" style="display:none; margin-top:20px;" onclick="resetApp()">Zkusit znovu</button>
                 </div>
             </section>
 

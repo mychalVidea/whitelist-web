@@ -128,14 +128,28 @@ function triggerConfetti() {
     animate();
 }
 
-// Multi-step navigation logic
-function setStep(stepNum) {
+// Multi-step navigation logic with smooth transition
+async function setStep(stepNum) {
     currentStep = stepNum;
     
-    // Toggle active panel
-    document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+    const activeCard = document.querySelector('.card.active');
     const targetCard = document.getElementById(`step-${stepNum}`);
-    if (targetCard) targetCard.classList.add('active');
+    
+    if (activeCard && targetCard && activeCard !== targetCard) {
+        // Fade out active
+        activeCard.classList.add('fade-out');
+        await new Promise(r => setTimeout(r, 400));
+        activeCard.classList.remove('active', 'fade-out');
+        
+        // Fade in target
+        targetCard.classList.add('fade-in');
+        targetCard.classList.add('active');
+        await new Promise(r => setTimeout(r, 50));
+        targetCard.classList.remove('fade-in');
+    } else {
+        document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+        if (targetCard) targetCard.classList.add('active');
+    }
 
     // Update progress bar width
     const progressFill = document.getElementById('progress-fill');
@@ -192,7 +206,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Check errors
     if (paramError) {
         if (paramError === 'not_in_guild') {
-            showError('Není jsi členem našeho Discord serveru! Nejdříve se připoj na náš Discord server a zkus to znovu.');
+            showError('Nejsi členem našeho Discord serveru! Nejdříve se připoj na náš Discord server a zkus to znovu.');
         } else {
             showError('Ověření přes Discord selhalo.');
         }
@@ -325,19 +339,21 @@ function submitNick() {
     startRulesTimer();
 }
 
-// Rules reading countdown
+// Rules reading countdown & firefly guide logic
 let rulesTimerInterval;
 function startRulesTimer() {
     const timerFill = document.getElementById('timer-fill');
     const timerText = document.getElementById('timer-text');
     const acceptBtn = document.getElementById('btn-accept-rules');
     const lockIcon = document.getElementById('btn-lock');
+    const firefly = document.getElementById('rules-firefly');
 
     if (!timerFill || !acceptBtn) return;
 
-    let secondsLeft = 5;
+    let secondsLeft = 10;
     acceptBtn.disabled = true;
     if (lockIcon) lockIcon.style.display = 'inline-block';
+    if (firefly) firefly.style.opacity = '0';
 
     if (rulesTimerInterval) clearInterval(rulesTimerInterval);
 
@@ -345,14 +361,40 @@ function startRulesTimer() {
         if (timerText) timerText.textContent = secondsLeft;
         
         // Progress ring fill
-        const percentage = ((5 - secondsLeft) / 5) * 100;
+        const percentage = ((10 - secondsLeft) / 10) * 100;
         timerFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
+
+        // Highlight bodies and guide firefly every 2 seconds
+        // 10s total, 5 rules -> 2 seconds per rule
+        const ruleIdx = Math.min(5, Math.floor((10 - secondsLeft) / 2) + 1);
+        
+        document.querySelectorAll('.rule-item').forEach((item, index) => {
+            if (index + 1 === ruleIdx) {
+                item.classList.add('active');
+                
+                // Position the firefly smoothly next to the active rule
+                if (firefly) {
+                    const rect = item.getBoundingClientRect();
+                    const containerRect = item.parentElement.getBoundingClientRect();
+                    const topPos = rect.top - containerRect.top + rect.height / 2 - 3;
+                    const leftPos = rect.left - containerRect.left - 15;
+                    
+                    firefly.style.opacity = '1';
+                    firefly.style.top = `${topPos}px`;
+                    firefly.style.left = `${leftPos}px`;
+                }
+            } else {
+                item.classList.remove('active');
+            }
+        });
 
         if (secondsLeft <= 0) {
             clearInterval(rulesTimerInterval);
             acceptBtn.disabled = false;
             if (lockIcon) lockIcon.style.display = 'none';
             document.getElementById('rules-timer').style.opacity = '0.3';
+            if (firefly) firefly.style.opacity = '0';
+            document.querySelectorAll('.rule-item').forEach(item => item.classList.remove('active'));
         }
         secondsLeft--;
     }
@@ -370,6 +412,17 @@ function acceptRules() {
 // Satisfying animated check validation steps
 async function runVerificationSteps() {
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+    // Clear previous inline errors/crosses if any
+    const prevError = document.getElementById('inline-verify-error');
+    if (prevError) prevError.remove();
+    document.getElementById('btn-verify-retry').style.display = 'none';
+    
+    // Reset classes
+    document.querySelectorAll('.verify-step').forEach(step => {
+        step.className = 'verify-step';
+        step.querySelector('.verify-status').textContent = '';
+    });
 
     // Step 1: Discord account
     const vs1 = document.getElementById('vs-1');
@@ -406,9 +459,24 @@ async function runVerificationSteps() {
         const data = await response.json();
 
         if (response.status === 409) {
-            // Already whitelisted
+            // Already whitelisted - show red cross and restart button directly inside step-4!
             vs3.classList.remove('current');
-            showError(data.message);
+            vs3.classList.add('failed');
+            vs3.querySelector('.verify-status').textContent = '❌';
+            
+            // Add detailed message inline
+            const errLabel = document.createElement('div');
+            errLabel.id = 'inline-verify-error';
+            errLabel.style.color = 'var(--error-color)';
+            errLabel.style.fontSize = '13.5px';
+            errLabel.style.marginTop = '12px';
+            errLabel.style.fontWeight = '600';
+            errLabel.style.textAlign = 'center';
+            errLabel.textContent = data.message;
+            vs3.parentElement.appendChild(errLabel);
+
+            // Show retry button
+            document.getElementById('btn-verify-retry').style.display = 'block';
             return;
         }
 
@@ -435,7 +503,20 @@ async function runVerificationSteps() {
 
     } catch (error) {
         vs3.classList.remove('current');
-        showError(error.message);
+        vs3.classList.add('failed');
+        vs3.querySelector('.verify-status').textContent = '❌';
+
+        const errLabel = document.createElement('div');
+        errLabel.id = 'inline-verify-error';
+        errLabel.style.color = 'var(--error-color)';
+        errLabel.style.fontSize = '13.5px';
+        errLabel.style.marginTop = '12px';
+        errLabel.style.fontWeight = '600';
+        errLabel.style.textAlign = 'center';
+        errLabel.textContent = error.message;
+        vs3.parentElement.appendChild(errLabel);
+
+        document.getElementById('btn-verify-retry').style.display = 'block';
     }
 }
 
@@ -486,10 +567,15 @@ function showError(message) {
 
 // Reset app
 function resetApp() {
+    // Remove inline verify error label if exists
+    const prevError = document.getElementById('inline-verify-error');
+    if (prevError) prevError.remove();
+
     // Reset displays
     document.querySelectorAll('.card').forEach(card => card.style.display = '');
     document.getElementById('progress-container').style.display = '';
     document.getElementById('step-error').style.display = 'none';
+    document.getElementById('btn-verify-retry').style.display = 'none';
     
     // Reset spinners
     document.querySelectorAll('.verify-step').forEach(step => {
@@ -505,3 +591,4 @@ function resetApp() {
         setStep(1);
     }
 }
+
