@@ -547,6 +547,194 @@ function showSuccessState(alreadyExists = false, nick = '') {
         desc.textContent = `Tvůj nick "${nick}" byl úspěšně přidán na whitelist.`;
         triggerConfetti();
     }
+    
+    // Trigger funny flying guide firefly collision hint
+    triggerFlyingGuide();
+}
+
+// Flying guide firefly animation logic
+function triggerFlyingGuide() {
+    const btn = document.getElementById('btn-learn-more');
+    if (!btn) return;
+
+    setTimeout(() => {
+        // Create firefly container
+        const firefly = document.createElement('div');
+        firefly.className = 'flying-guide';
+        document.body.appendChild(firefly);
+
+        // Spawn position (offscreen left, mid-height)
+        const startX = -60;
+        const startY = window.innerHeight * 0.3 + Math.random() * 100;
+
+        // Target position (button center)
+        const rect = btn.getBoundingClientRect();
+        const targetX = rect.left + rect.width / 2;
+        const targetY = rect.top + rect.height / 2;
+
+        const duration = 2200; // 2.2 seconds flight
+        const startTime = performance.now();
+
+        let lastX = startX;
+        let lastY = startY;
+
+        function animate(time) {
+            const progress = (time - startTime) / duration;
+            if (progress >= 1) {
+                // Collision!
+                firefly.remove();
+                
+                // Set the firefly at the hit location for dizzy stage
+                const dizzyFirefly = document.createElement('div');
+                dizzyFirefly.className = 'flying-guide firefly-dizzy';
+                dizzyFirefly.style.left = `${targetX - 4}px`;
+                dizzyFirefly.style.top = `${targetY - 20}px`;
+                document.body.appendChild(dizzyFirefly);
+
+                btn.classList.add('button-hit-shake');
+                btn.classList.add('btn-glow-active');
+                
+                // Spawn comic-style bubble
+                const bubble = document.createElement('div');
+                bubble.className = 'collision-bubble';
+                bubble.textContent = 'BÁC!';
+                bubble.style.left = `${targetX}px`;
+                bubble.style.top = `${targetY - 50}px`;
+                document.body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 1000);
+
+                // Spawn sparkles
+                spawnSparkles(targetX, targetY);
+                
+                // Shake end
+                setTimeout(() => {
+                    btn.classList.remove('button-hit-shake');
+                }, 600);
+
+                // Dizzy orbiting stars
+                const stars = [];
+                for (let i = 0; i < 3; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'dizzy-star';
+                    star.textContent = '💫';
+                    document.body.appendChild(star);
+                    stars.push(star);
+                }
+
+                let dizzyTime = 0;
+                const dizzyInterval = setInterval(() => {
+                    dizzyTime += 0.08;
+                    const bRect = dizzyFirefly.getBoundingClientRect();
+                    const cx = bRect.left + bRect.width / 2;
+                    const cy = bRect.top;
+                    
+                    stars.forEach((star, index) => {
+                        const angle = dizzyTime + (index * Math.PI * 2 / 3);
+                        const rx = 18;
+                        const ry = 6;
+                        const sx = cx + Math.cos(angle) * rx;
+                        const sy = cy + Math.sin(angle) * ry - 5;
+                        star.style.left = `${sx}px`;
+                        star.style.top = `${sy}px`;
+                        star.style.transform = `translate(-50%, -50%) rotate(${dizzyTime * 80}deg)`;
+                    });
+                }, 30);
+
+                // Fall down after 1.4 seconds
+                setTimeout(() => {
+                    clearInterval(dizzyInterval);
+                    stars.forEach(s => s.remove());
+                    dizzyFirefly.classList.remove('firefly-dizzy');
+
+                    let fallY = targetY - 20;
+                    let fallX = targetX - 4;
+                    let vy = -3;
+                    let vx = -1.5;
+                    const gravity = 0.35;
+                    let fallRotation = 0;
+
+                    function fall() {
+                        vy += gravity;
+                        fallX += vx;
+                        fallY += vy;
+                        fallRotation += 12;
+
+                        dizzyFirefly.style.left = `${fallX}px`;
+                        dizzyFirefly.style.top = `${fallY}px`;
+                        dizzyFirefly.style.transform = `rotate(${fallRotation}deg) scaleY(-1)`;
+
+                        if (fallY < window.innerHeight + 50) {
+                            requestAnimationFrame(fall);
+                        } else {
+                            dizzyFirefly.remove();
+                        }
+                    }
+                    requestAnimationFrame(fall);
+                }, 1400);
+
+                return;
+            }
+
+            // Clumsy wobbly trajectory + loop-de-loop!
+            const baseX = startX + (targetX - startX) * progress;
+            const baseY = startY + (targetY - startY) * progress;
+            
+            // 1. Clumsy sine wobble
+            const wobble = Math.sin(progress * Math.PI * 5) * 25;
+            let x = baseX;
+            let y = baseY + wobble;
+
+            // 2. Loop-de-loop between progress 0.35 and 0.65
+            if (progress > 0.35 && progress < 0.65) {
+                const loopT = (progress - 0.35) / 0.30;
+                const loopAngle = loopT * Math.PI * 2;
+                const loopRadius = 55;
+                x += Math.sin(loopAngle) * loopRadius;
+                y += (-Math.cos(loopAngle) + 1) * loopRadius;
+            }
+
+            // Calculate flight angle (direction vector)
+            const dx = x - lastX;
+            const dy = y - lastY;
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+            firefly.style.left = `${x}px`;
+            firefly.style.top = `${y}px`;
+            firefly.style.transform = `rotate(${angle}deg)`;
+
+            lastX = x;
+            lastY = y;
+
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+    }, 2500);
+}
+
+
+// Spawn sparkle explosion particles on impact
+function spawnSparkles(x, y) {
+    for (let i = 0; i < 24; i++) {
+        const p = document.createElement('div');
+        p.className = 'sparkle-particle';
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        document.body.appendChild(p);
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 90 + 30;
+        const targetX = Math.cos(angle) * dist;
+        const targetY = Math.sin(angle) * dist;
+
+        setTimeout(() => {
+            p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
+            p.style.opacity = '0';
+        }, 50);
+
+        setTimeout(() => {
+            p.remove();
+        }, 900);
+    }
 }
 
 // Show error panel view
