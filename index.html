@@ -12,8 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
+    <link rel="icon" type="image/png" href="assets/mychalSMP-SERVERICON-V2-NOEFF.png">
 </head>
 
 <body>
@@ -29,7 +28,7 @@
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <span class="logo-icon">⛏️</span>
+                <img class="logo-icon" src="assets/mychalSMP-SERVERICON-V2-NOEFF.png" alt="Logo">
                 <div class="logo-text">
                     <h1>MYCHAL <span class="accent">SMP</span></h1>
                     <p class="subtitle">Whitelist registrace</p>
@@ -212,6 +211,11 @@
                             <span class="verify-label">Přidávám na whitelist</span>
                             <span class="verify-status"></span>
                         </div>
+                        <div class="verify-step" id="vs-5">
+                            <div class="verify-spinner"></div>
+                            <span class="verify-label">Synchronizuji role a prefixy</span>
+                            <span class="verify-status"></span>
+                        </div>
                     </div>
                     <button class="btn btn-secondary" id="btn-verify-retry" style="display:none; margin-top:20px;"
                         onclick="resetApp()">Zkusit znovu</button>
@@ -228,8 +232,8 @@
                     <div class="server-info" id="server-info">
                         <div class="info-row">
                             <span class="info-label">📡 IP adresa</span>
-                            <span class="info-value copyable" onclick="copyToClipboard('mychalsmp.feathermc.gg', this)"
-                                id="server-ip">mychalsmp.feathermc.gg</span>
+                            <span class="info-value copyable" onclick="copyToClipboard('land-wars.gl.joinmc.link', this)"
+                                id="server-ip">land-wars.gl.joinmc.link</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">🎮 Verze</span>

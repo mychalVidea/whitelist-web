@@ -524,6 +524,16 @@ async function runVerificationSteps() {
         vs4.classList.add('done');
         vs4.querySelector('.verify-status').textContent = '✅';
 
+        // Step 5: Synchronizing roles and prefixes
+        const vs5 = document.getElementById('vs-5');
+        if (vs5) {
+            vs5.classList.add('current');
+            await delay(1500);
+            vs5.classList.remove('current');
+            vs5.classList.add('done');
+            vs5.querySelector('.verify-status').textContent = '✅';
+        }
+
         // Success transition
         await delay(500);
         showSuccessState(false, selectedNick);

@@ -122,7 +122,9 @@ body {
 }
 
 .logo-icon {
-    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
     filter: drop-shadow(0 0 10px var(--accent-glow));
     animation: rotatePick 3s infinite ease-in-out;
 }
