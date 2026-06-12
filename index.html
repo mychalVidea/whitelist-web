@@ -119,7 +119,22 @@
                         </div>
                     </div>
                     <p class="nick-validation" id="nick-validation"></p>
-                    <button class="btn btn-primary" id="btn-submit-nick" onclick="submitNick()" disabled>
+                    <div class="source-select-group">
+                        <label for="mc-source-select">Kde jsi se o našem Minecraft serveru dozvěděl? *</label>
+                        <div class="select-wrapper">
+                            <select id="mc-source-select">
+                                <option value="" disabled selected>Vyber možnost...</option>
+                                <option value="youtube">🎥 YouTube</option>
+                                <option value="friend">👥 Od kamaráda</option>
+                                <option value="discord">💬 Discord</option>
+                                <option value="tiktok">🎵 TikTok</option>
+                                <option value="instagram">📸 Instagram</option>
+                                <option value="other">❓ Jiné / Internet</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-submit-nick" onclick="submitNick()" disabled
+                        style="margin-top: 24px;">
                         Pokračovat
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

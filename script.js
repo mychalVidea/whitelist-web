@@ -206,7 +206,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Check errors
     if (paramError) {
         if (paramError === 'not_in_guild') {
-            showError('Nejsi členem našeho Discord serveru! Nejdříve se připoj na náš Discord server a zkus to znovu.');
+            const inviteUrl = params.get('invite') || 'https://discord.gg/875027587477409862';
+            showDiscordInviteError(inviteUrl);
+        } else if (paramError === 'joined_too_recently') {
+            const minutesLeft = params.get('minutes_left') || '30';
+            showError(`Na našem Discord serveru musíš být alespoň 30 minut, než se můžeš zapsat na whitelist. Počkej prosím ještě ${minutesLeft} minut.`);
         } else {
             showError('Ověření přes Discord selhalo.');
         }
@@ -267,28 +271,45 @@ async function verifyUserSession() {
     }
 }
 
-// Set up listeners for MC Nick input
+let selectedSource = '';
+
+// Set up listeners for MC Nick input and discovery source selection
 function setupInputListeners() {
     const input = document.getElementById('mc-nick-input');
+    const select = document.getElementById('mc-source-select');
     const previewImg = document.getElementById('mc-head-img');
     const placeholder = document.getElementById('mc-head-placeholder');
     const validation = document.getElementById('nick-validation');
     const submitBtn = document.getElementById('btn-submit-nick');
 
-    if (!input) return;
+    if (!input || !select) return;
 
     let debounceTimeout;
+    let nickIsValid = false;
+
+    function checkFormState() {
+        const sourceVal = select.value;
+        if (nickIsValid && sourceVal) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+
+    select.addEventListener('change', checkFormState);
 
     input.addEventListener('input', () => {
         const val = input.value.trim();
         clearTimeout(debounceTimeout);
+        nickIsValid = false;
+        submitBtn.disabled = true;
 
         if (!val) {
             previewImg.style.display = 'none';
             placeholder.style.display = 'block';
             placeholder.textContent = '?';
             validation.textContent = '';
-            submitBtn.disabled = true;
+            checkFormState();
             return;
         }
 
@@ -297,16 +318,15 @@ function setupInputListeners() {
         if (!validRegex) {
             validation.textContent = '❌ Nick může obsahovat jen písmena, čísla a podtržítko (3-16 znaků)';
             validation.className = 'nick-validation error';
-            submitBtn.disabled = true;
             previewImg.style.display = 'none';
             placeholder.style.display = 'block';
             placeholder.textContent = '❌';
+            checkFormState();
             return;
         }
 
         validation.textContent = '⏳ Kontroluji nick...';
         validation.className = 'nick-validation';
-        submitBtn.disabled = true;
 
         debounceTimeout = setTimeout(() => {
             // Update head preview
@@ -316,7 +336,8 @@ function setupInputListeners() {
                 placeholder.style.display = 'none';
                 validation.textContent = '✅ Správný formát nicku';
                 validation.className = 'nick-validation valid';
-                submitBtn.disabled = false;
+                nickIsValid = true;
+                checkFormState();
             };
             previewImg.onerror = () => {
                 previewImg.style.display = 'none';
@@ -324,7 +345,8 @@ function setupInputListeners() {
                 placeholder.textContent = '?';
                 validation.textContent = '❌ Selhalo načtení skinu z Mojangu';
                 validation.className = 'nick-validation error';
-                submitBtn.disabled = false; // still allow submission if Mojang is down
+                nickIsValid = true; // still allow submission if Mojang is down
+                checkFormState();
             };
         }, 400);
     });
@@ -333,8 +355,10 @@ function setupInputListeners() {
 // Handle MC nick confirmation
 function submitNick() {
     const input = document.getElementById('mc-nick-input');
-    if (!input) return;
+    const select = document.getElementById('mc-source-select');
+    if (!input || !select) return;
     selectedNick = input.value.trim();
+    selectedSource = select.value;
     setStep(3);
     startRulesTimer();
 }
@@ -453,7 +477,10 @@ async function runVerificationSteps() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${sessionToken}`
             },
-            body: JSON.stringify({ minecraftNick: selectedNick })
+            body: JSON.stringify({ 
+                minecraftNick: selectedNick,
+                discoverySource: selectedSource
+            })
         });
 
         const data = await response.json();
@@ -753,11 +780,56 @@ function showError(message) {
     if (errorCard) errorCard.style.display = 'block';
 }
 
+// Show specific Discord invite error view
+function showDiscordInviteError(inviteUrl) {
+    document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
+    document.getElementById('progress-container').style.display = 'none';
+
+    const errorCard = document.getElementById('step-error');
+    const errorTitle = document.getElementById('error-title');
+    const errorDesc = document.getElementById('error-desc');
+    
+    if (errorTitle) errorTitle.textContent = 'Nejsi na našem Discordu!';
+    if (errorDesc) {
+        errorDesc.innerHTML = 'Pro zápis na whitelist musíš být členem našeho Discord serveru.<br>Připoj se pomocí tlačítka níže a poté to zkus znovu!';
+    }
+    
+    const existingInviteBtn = document.getElementById('btn-error-invite');
+    if (existingInviteBtn) existingInviteBtn.remove();
+
+    const inviteBtn = document.createElement('a');
+    inviteBtn.id = 'btn-error-invite';
+    inviteBtn.className = 'btn btn-discord';
+    inviteBtn.href = inviteUrl;
+    inviteBtn.target = '_blank';
+    inviteBtn.style.marginTop = '15px';
+    inviteBtn.style.marginBottom = '15px';
+    inviteBtn.style.textDecoration = 'none';
+    inviteBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 71 55" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
+            <path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.7 40.7 0 00-1.8 3.7 54 54 0 00-16.2 0A26.4 26.4 0 0025.4.3a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.6.2.2 0 00-.1.1A60 60 0 00.4 43.5a.2.2 0 00.1.2 58.8 58.8 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .3 36.4 36.4 0 01-5.5 2.7.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3 0A58.6 58.6 0 0070.5 43.7a.2.2 0 00.1-.1 59.7 59.7 0 00-10.5-38.7zM23.7 35.7c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8zm22.6 0c-3.3 0-6.1-3.1-6.1-6.8s2.7-6.8 6.1-6.8 6.1 3.1 6.1 6.8-2.7 6.8-6.1 6.8z" />
+        </svg>
+        Připojit se na Discord server
+    `;
+
+    const cardContent = errorCard.querySelector('.card-content');
+    const retryBtn = cardContent.querySelector('button');
+    cardContent.insertBefore(inviteBtn, retryBtn);
+
+    if (errorCard) errorCard.style.display = 'block';
+}
+
 // Reset app
 function resetApp() {
     // Remove inline verify error label if exists
     const prevError = document.getElementById('inline-verify-error');
     if (prevError) prevError.remove();
+
+    const existingInviteBtn = document.getElementById('btn-error-invite');
+    if (existingInviteBtn) existingInviteBtn.remove();
+    
+    const errorTitle = document.getElementById('error-title');
+    if (errorTitle) errorTitle.textContent = 'Něco se nepovedlo';
 
     // Reset displays
     document.querySelectorAll('.card').forEach(card => card.style.display = '');
