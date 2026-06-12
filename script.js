@@ -324,11 +324,19 @@ function setupInputListeners() {
     const placeholder = document.getElementById('mc-head-placeholder');
     const validation = document.getElementById('nick-validation');
     const submitBtn = document.getElementById('btn-submit-nick');
+    const sourceGroup = document.querySelector('.source-select-group');
 
     if (!input || !select) return;
 
+    // Reset visibility states on setup
+    if (sourceGroup) {
+        sourceGroup.classList.remove('dropdown-ready');
+        sourceGroup.classList.remove('visible');
+    }
+
     let debounceTimeout;
     let nickIsValid = false;
+    let revealTimeout = null;
 
     function checkFormState() {
         const sourceVal = select.value;
@@ -336,6 +344,29 @@ function setupInputListeners() {
             submitBtn.disabled = false;
         } else {
             submitBtn.disabled = true;
+        }
+
+        if (nickIsValid) {
+            if (sourceGroup && !sourceGroup.classList.contains('visible') && !revealTimeout) {
+                revealTimeout = setTimeout(() => {
+                    sourceGroup.classList.add('visible');
+                    setTimeout(() => {
+                        if (sourceGroup && sourceGroup.classList.contains('visible')) {
+                            sourceGroup.classList.add('dropdown-ready');
+                        }
+                    }, 500); // Wait for transition max-height to complete
+                    revealTimeout = null;
+                }, 1000); // 1 second delay after nick becomes valid
+            }
+        } else {
+            if (revealTimeout) {
+                clearTimeout(revealTimeout);
+                revealTimeout = null;
+            }
+            if (sourceGroup) {
+                sourceGroup.classList.remove('dropdown-ready');
+                sourceGroup.classList.remove('visible');
+            }
         }
     }
 

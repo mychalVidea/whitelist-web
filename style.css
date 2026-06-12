@@ -926,9 +926,31 @@ h2 {
 .source-select-group {
     width: 100%;
     max-width: 380px;
+    text-align: left;
+    
+    /* Smooth slide-in reveal transition */
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateX(80px);
+    transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                margin 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                opacity 0.5s ease,
+                transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+.source-select-group.visible {
+    max-height: 150px;
     margin-top: 20px;
     margin-bottom: 20px;
-    text-align: left;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.source-select-group.dropdown-ready {
+    overflow: visible;
 }
 
 .source-select-group label {
