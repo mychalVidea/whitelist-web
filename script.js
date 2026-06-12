@@ -271,6 +271,49 @@ async function verifyUserSession() {
     }
 }
 
+// Custom Dropdown for source select
+function toggleSourceDropdown() {
+    const dropdown = document.getElementById('custom-source-select');
+    if (dropdown) {
+        dropdown.classList.toggle('open');
+    }
+}
+
+function selectSource(optionElement) {
+    const val = optionElement.getAttribute('data-value');
+    const emoji = optionElement.querySelector('.source-emoji').textContent;
+    const label = optionElement.querySelector('.source-text strong').textContent;
+
+    const triggerText = document.getElementById('source-trigger-text');
+    if (triggerText) {
+        triggerText.innerHTML = `<span class="source-emoji" style="font-size: 16px; margin-right: 8px;">${emoji}</span>${label}`;
+    }
+
+    const select = document.getElementById('mc-source-select');
+    if (select) {
+        select.value = val;
+        select.dispatchEvent(new Event('change'));
+    }
+
+    const dropdown = document.getElementById('custom-source-select');
+    if (dropdown) {
+        dropdown.querySelectorAll('.source-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        optionElement.classList.add('selected');
+        dropdown.classList.add('selected');
+        dropdown.classList.remove('open');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (event) => {
+    const dropdown = document.getElementById('custom-source-select');
+    if (dropdown && !dropdown.contains(event.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+
 let selectedSource = '';
 
 // Set up listeners for MC Nick input and discovery source selection
