@@ -420,33 +420,6 @@ function showMinecraftToast(title, description, icon = '🏆') {
     }, 5500);
 }
 
-// 3D Card Tilt Effect
-function setupCardTilt() {
-    const container = document.querySelector('.card-container');
-    if (!container) return;
-    
-    container.addEventListener('mousemove', (e) => {
-        const rect = container.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        const tiltX = (centerY - y) / centerY;
-        const tiltY = (x - centerX) / centerX;
-        
-        const maxTiltAngle = 8;
-        const rotateX = (tiltX * maxTiltAngle).toFixed(2);
-        const rotateY = (tiltY * maxTiltAngle).toFixed(2);
-        
-        container.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    });
-    
-    container.addEventListener('mouseleave', () => {
-        container.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-    });
-}
 
 // Minecraft block break click particles
 function setupBlockBreakParticles() {
@@ -531,8 +504,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load token
     sessionToken = paramToken || localStorage.getItem('whitelist_token');
 
-    // Setup 3D card perspective tilt and button block-break particles
-    setupCardTilt();
+    // Setup button block-break particles
     setupBlockBreakParticles();
     setupInputListeners();
 
