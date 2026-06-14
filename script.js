@@ -140,15 +140,14 @@ function play8bitSound(type) {
             audioCtx.resume();
         }
         
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
         const now = audioCtx.currentTime;
         
         if (type === 'click') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(400, now);
             osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
@@ -160,6 +159,11 @@ function play8bitSound(type) {
             osc.stop(now + 0.08);
         } 
         else if (type === 'error') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(180, now);
             osc.frequency.setValueAtTime(120, now + 0.25);
@@ -197,6 +201,34 @@ function play8bitSound(type) {
             
             chime2.start(now + 0.08);
             chime2.stop(now + 0.45);
+        }
+        else if (type === 'poof') {
+            // White noise buffer for smoke poof
+            const bufferSize = audioCtx.sampleRate * 0.15; // 0.15s
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 600; // block break style thud
+            
+            const gain = audioCtx.createGain();
+            
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            
+            noise.start(now);
+            noise.stop(now + 0.15);
         }
     } catch (err) {
         console.warn('Web Audio API is not supported or was blocked:', err);
@@ -1043,7 +1075,7 @@ function flyEnergyParticle(startX, startY, targetElement) {
     document.body.appendChild(particle);
 
     const startTime = performance.now();
-    const duration = 700 + Math.random() * 300; // 0.7s to 1.0s flight time
+    const duration = 280 + Math.random() * 120; // Snappy 0.28s to 0.40s flight time
 
     // Arc path offsets
     const rect = targetElement.getBoundingClientRect();
@@ -1052,8 +1084,8 @@ function flyEnergyParticle(startX, startY, targetElement) {
 
     const midX = (startX + targetX) / 2;
     const midY = (startY + targetY) / 2;
-    const offsetX = (Math.random() - 0.5) * 160;
-    const offsetY = -80 - Math.random() * 100;
+    const offsetX = (Math.random() - 0.5) * 120;
+    const offsetY = -60 - Math.random() * 80;
     const cpX = midX + offsetX;
     const cpY = midY + offsetY;
 
@@ -1116,11 +1148,11 @@ function triggerTutorialEnergy(sourceElement, containerSelector) {
         target.classList.add('energy-target-dimmed');
     });
 
-    // Fire flying fireflies sequentially
+    // Fire flying fireflies sequentially (very quick 30ms stagger)
     targets.forEach((target, index) => {
         setTimeout(() => {
             flyEnergyParticle(startX, startY, target);
-        }, index * 80);
+        }, index * 30);
     });
 }
 
@@ -1218,22 +1250,70 @@ function toggleTutorial() {
     const btn = document.getElementById('btn-learn-more');
     if (!container || !btn) return;
 
-    if (container.style.display === 'none') {
+    if (container.style.display === 'none' || container.classList.contains('closing')) {
+        // OPENING
+        container.classList.remove('closing');
         container.style.display = 'block';
         btn.textContent = 'Skrýt návod 📖';
         
-        // Wait for unfold animation to complete before running energy particles
+        play8bitSound('click');
+        
+        // Wait 350ms so particles fly while unfolding and hit right as it completes
         setTimeout(() => {
             triggerTutorialEnergy(btn, '#pane-claim');
-        }, 700);
+        }, 350);
 
         // Scroll to the tutorial container smoothly
         setTimeout(() => {
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
     } else {
-        container.style.display = 'none';
+        // CLOSING
+        container.classList.add('closing');
         btn.textContent = 'Dozvědět se více (Jak hrát?) 📖';
+        
+        play8bitSound('poof');
+        spawnSmokePoof(container);
+        
+        // Wait for fold animation to complete (400ms) before display none
+        setTimeout(() => {
+            if (container.classList.contains('closing')) {
+                container.style.display = 'none';
+                container.classList.remove('closing');
+            }
+        }, 400);
+    }
+}
+
+// Spawn blocky smoke particles on close
+function spawnSmokePoof(element) {
+    const rect = element.getBoundingClientRect();
+    const particleCount = 18 + Math.floor(Math.random() * 8);
+    
+    for (let i = 0; i < particleCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'smoke-particle';
+        
+        const size = Math.random() * 6 + 6;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        
+        const x = rect.left + Math.random() * rect.width;
+        const y = rect.bottom - 12;
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        
+        document.body.appendChild(p);
+        
+        const targetX = (Math.random() - 0.5) * 80;
+        const targetY = -35 - Math.random() * 45;
+        
+        setTimeout(() => {
+            p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.2)`;
+            p.style.opacity = '0';
+        }, 10);
+        
+        setTimeout(() => p.remove(), 700);
     }
 }
 
