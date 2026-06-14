@@ -7,6 +7,8 @@ let sessionToken = null;
 let discordId = null;
 let discordUsername = null;
 let selectedNick = '';
+let initialLoad = true;
+let transitionTimeout = null;
 
 // Particle effect on background
 const canvas = document.getElementById('particles');
@@ -236,61 +238,91 @@ function play8bitSound(type) {
 }
 
 // Multi-step navigation logic with Y-axis 3D slide transitions
+// Multi-step navigation logic with fluid horizontal carousel transitions
 async function setStep(stepNum, direction = 'next') {
-    const activeCard = document.querySelector('.card.active');
-    const targetCard = document.getElementById(`step-${stepNum}`);
+    const cardContainer = document.querySelector('.card-container');
+    const cardSlider = document.getElementById('card-slider');
+    if (!cardContainer || !cardSlider) return;
+
+    const cards = Array.from(cardSlider.querySelectorAll('.card'));
+    const activeCard = cardSlider.querySelector('.card.active') || cards[0];
+    
+    let targetCard;
+    if (stepNum === 'error') {
+        targetCard = document.getElementById('step-error');
+    } else {
+        targetCard = document.getElementById(`step-${stepNum}`);
+    }
+    
+    if (!targetCard) return;
+    
+    const targetIndex = cards.indexOf(targetCard);
+    if (targetIndex === -1) return;
     
     currentStep = stepNum;
     
-    if (activeCard && targetCard && activeCard !== targetCard) {
-        // Clear active tilt transform before swiping
-        activeCard.style.transform = '';
-        
-        const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
-        const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
-        
-        play8bitSound('click');
-        
-        // Ensure both are displayed and positioned correctly for overlapping transition
-        // Make the active card absolute so it doesn't push the target card down
-        activeCard.style.position = 'absolute';
-        activeCard.style.width = '100%';
-        activeCard.style.top = '0';
-        activeCard.style.left = '0';
-        activeCard.style.zIndex = '1';
-        
-        targetCard.style.position = 'relative';
-        targetCard.style.zIndex = '2';
-        
-        // Start animations simultaneously
-        activeCard.classList.add(outClass);
-        targetCard.classList.add(inClass, 'active');
-        
-        await new Promise(r => setTimeout(r, 450));
-        
-        // Clean up
-        activeCard.classList.remove('active', outClass);
-        activeCard.style.position = '';
-        activeCard.style.width = '';
-        activeCard.style.top = '';
-        activeCard.style.left = '';
-        activeCard.style.zIndex = '';
-        
-        targetCard.classList.remove(inClass);
-        targetCard.style.position = '';
-        targetCard.style.zIndex = '';
-    } else {
-        document.querySelectorAll('.card').forEach(card => {
-            card.classList.remove('active');
-            card.style.position = '';
-            card.style.width = '';
-            card.style.top = '';
-            card.style.left = '';
-            card.style.zIndex = '';
-        });
-        if (targetCard) targetCard.classList.add('active');
+    if (transitionTimeout) {
+        clearTimeout(transitionTimeout);
+        transitionTimeout = null;
     }
 
+    if (initialLoad) {
+        // Instant update without transition on first load
+        cardContainer.style.transition = 'none';
+        cardSlider.style.transition = 'none';
+        cards.forEach(c => c.style.transition = 'none');
+        
+        cards.forEach(c => c.classList.remove('active'));
+        targetCard.classList.add('active');
+        
+        cardSlider.style.transform = `translateX(-${targetIndex * 100}%)`;
+        
+        // Measure and set container height instantly
+        const targetHeight = targetCard.offsetHeight;
+        cardContainer.style.height = `${targetHeight}px`;
+        
+        // Force reflow
+        cardContainer.offsetHeight;
+        
+        // Re-enable transitions on next tick
+        setTimeout(() => {
+            cardContainer.style.transition = '';
+            cardSlider.style.transition = '';
+            cards.forEach(c => c.style.transition = '');
+            cardContainer.style.height = 'auto';
+            cardContainer.style.overflow = 'visible';
+        }, 50);
+        
+        initialLoad = false;
+    } else {
+        if (activeCard && activeCard !== targetCard) {
+            play8bitSound('click');
+            
+            const currentHeight = activeCard.offsetHeight;
+            const targetHeight = targetCard.offsetHeight;
+            
+            // Set overflow to hidden and fix height to current card height to start transition
+            cardContainer.style.overflow = 'hidden';
+            cardContainer.style.height = `${currentHeight}px`;
+            
+            // Force reflow to commit current height style before transition
+            cardContainer.offsetHeight;
+            
+            // Start transitions
+            cardContainer.style.height = `${targetHeight}px`;
+            cardSlider.style.transform = `translateX(-${targetIndex * 100}%)`;
+            
+            cards.forEach(c => c.classList.remove('active'));
+            targetCard.classList.add('active');
+            
+            // Wait for 600ms transition to complete
+            transitionTimeout = setTimeout(() => {
+                cardContainer.style.height = 'auto';
+                cardContainer.style.overflow = 'visible';
+                transitionTimeout = null;
+            }, 600);
+        }
+    }
 
     // Update progress bar width
     const progressFill = document.getElementById('progress-fill');
@@ -299,19 +331,34 @@ async function setStep(stepNum, direction = 'next') {
         if (stepNum === 2) percent = 50;
         if (stepNum === 3) percent = 75;
         if (stepNum === 4 || stepNum === 5) percent = 100;
-        progressFill.style.width = `${percent}%`;
+        if (stepNum !== 'error') {
+            progressFill.style.width = `${percent}%`;
+        }
     }
 
     // Update active class on progress indicators
-    document.querySelectorAll('.progress-steps .step').forEach(step => {
-        const stepVal = parseInt(step.getAttribute('data-step'));
-        if (stepVal <= stepNum) {
-            step.classList.add('active');
-        } else {
-            step.classList.remove('active');
+    if (stepNum !== 'error') {
+        document.querySelectorAll('.progress-steps .step').forEach(step => {
+            const stepVal = parseInt(step.getAttribute('data-step'));
+            if (stepVal <= stepNum) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+        });
+    }
+
+    // Autofocus Minecraft nickname input when landing on Step 2
+    if (stepNum === 2) {
+        const input = document.getElementById('mc-nick-input');
+        if (input) {
+            setTimeout(() => {
+                input.focus();
+            }, 50);
         }
-    });
+    }
 }
+
 
 // Navigation helpers for nickname correction
 function goBackToNick() {
@@ -375,28 +422,29 @@ function showMinecraftToast(title, description, icon = '🏆') {
 
 // 3D Card Tilt Effect
 function setupCardTilt() {
-    document.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            
-            const tiltX = (centerY - y) / centerY;
-            const tiltY = (x - centerX) / centerX;
-            
-            const maxTiltAngle = 8;
-            const rotateX = (tiltX * maxTiltAngle).toFixed(2);
-            const rotateY = (tiltY * maxTiltAngle).toFixed(2);
-            
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        });
+    const container = document.querySelector('.card-container');
+    if (!container) return;
+    
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
         
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-        });
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const tiltX = (centerY - y) / centerY;
+        const tiltY = (x - centerX) / centerX;
+        
+        const maxTiltAngle = 8;
+        const rotateX = (tiltX * maxTiltAngle).toFixed(2);
+        const rotateY = (tiltY * maxTiltAngle).toFixed(2);
+        
+        container.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        container.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     });
 }
 
@@ -529,6 +577,7 @@ async function verifyUserSession() {
                 showSuccessState(true, data.existingNick);
             } else {
                 setStep(2);
+                showMinecraftToast('Dosažen pokrok!', 'Účet Discord propojen!', '💬');
             }
         } else {
             throw new Error(data.message || 'Nepodařilo se ověřit uživatele.');
@@ -702,6 +751,8 @@ function submitNick() {
     selectedSource = select.value;
     setStep(3, 'next');
     startRulesTimer();
+    
+    showMinecraftToast('Dosažen pokrok!', 'Přezdívka nastavena!', '🎮');
 }
 
 // Rules reading countdown & firefly guide logic
@@ -772,6 +823,8 @@ function startRulesTimer() {
 function acceptRules() {
     setStep(4, 'next');
     runVerificationSteps();
+    
+    showMinecraftToast('Dosažen pokrok!', 'Pravidla přijata!', '📜');
 }
 
 // Satisfying animated check validation steps
@@ -898,17 +951,65 @@ async function runVerificationSteps() {
     }
 }
 
-// Copy server IP address helper
+// Copy server IP address helper with satisfying feedback and green sparkles
 function copyToClipboard(text, element) {
     navigator.clipboard.writeText(text).then(() => {
-        const originalText = element.textContent;
-        element.textContent = 'Kopírováno! 📋';
-        element.style.color = '#10b981';
+        play8bitSound('click');
+        
+        // Add copied class to trigger green highlight bounce
+        element.classList.add('copied');
+
+        // Create a floating feedback tooltip above the element
+        const rect = element.getBoundingClientRect();
+        const tooltip = document.createElement('div');
+        tooltip.className = 'copy-tooltip';
+        tooltip.textContent = 'IP Zkopírována! 📋';
+        
+        // Position fixed coordinates relative to viewport
+        tooltip.style.left = `${rect.left + rect.width / 2}px`;
+        tooltip.style.top = `${rect.top - 18}px`;
+        document.body.appendChild(tooltip);
+
+        // Spawn a burst of green particles
+        spawnGreenSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        // Clean up copied class and tooltip after delay
         setTimeout(() => {
-            element.textContent = originalText;
-            element.style.color = '';
-        }, 1500);
+            element.classList.remove('copied');
+        }, 1200);
+
+        setTimeout(() => {
+            tooltip.classList.add('fade-out');
+            setTimeout(() => tooltip.remove(), 400);
+        }, 1000);
     });
+}
+
+// Spawns green sparkle particles at the specified coordinates
+function spawnGreenSparkles(x, y) {
+    const colors = ['#10b981', '#34d399', '#059669', '#ffffff'];
+    for (let i = 0; i < 14; i++) {
+        const p = document.createElement('div');
+        p.className = 'sparkle-particle';
+        
+        p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        p.style.boxShadow = `0 0 8px ${colors[0]}`;
+        document.body.appendChild(p);
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 45 + 15;
+        const targetX = Math.cos(angle) * dist;
+        const targetY = Math.sin(angle) * dist - 8;
+
+        setTimeout(() => {
+            p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
+            p.style.opacity = '0';
+        }, 10);
+
+        setTimeout(() => p.remove(), 800);
+    }
 }
 
 // Show success view
@@ -951,8 +1052,7 @@ function triggerFlyingGuide() {
         const rect = btn.getBoundingClientRect();
         const targetX = rect.left + rect.width / 2;
         const targetY = rect.top + rect.height / 2;
-
-        const duration = 1100; // 1.1 seconds flight
+        const duration = 2200; // Restore original wobbly 2.2 seconds flight speed
         const startTime = performance.now();
 
         let lastX = startX;
@@ -1158,26 +1258,22 @@ function triggerTutorialEnergy(sourceElement, containerSelector) {
 
 // Show error panel view
 function showError(message) {
-    // Hide active step cards
-    document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
-    
     // Hide progress bar container
-    document.getElementById('progress-container').style.display = 'none';
+    const progressContainer = document.getElementById('progress-container');
+    if (progressContainer) progressContainer.style.display = 'none';
 
     // Show error card
-    const errorCard = document.getElementById('step-error');
     const errorDesc = document.getElementById('error-desc');
-    
     if (errorDesc) errorDesc.textContent = message;
-    if (errorCard) errorCard.style.display = 'block';
+    
+    setStep('error', 'next');
 }
 
 // Show specific Discord invite error view
 function showDiscordInviteError(inviteUrl) {
-    document.querySelectorAll('.card').forEach(card => card.style.display = 'none');
-    document.getElementById('progress-container').style.display = 'none';
+    const progressContainer = document.getElementById('progress-container');
+    if (progressContainer) progressContainer.style.display = 'none';
 
-    const errorCard = document.getElementById('step-error');
     const errorTitle = document.getElementById('error-title');
     const errorDesc = document.getElementById('error-desc');
     
@@ -1204,11 +1300,12 @@ function showDiscordInviteError(inviteUrl) {
         Připojit se na Discord server
     `;
 
+    const errorCard = document.getElementById('step-error');
     const cardContent = errorCard.querySelector('.card-content');
     const retryBtn = cardContent.querySelector('button');
     cardContent.insertBefore(inviteBtn, retryBtn);
 
-    if (errorCard) errorCard.style.display = 'block';
+    setStep('error', 'next');
 }
 
 // Reset app
@@ -1223,32 +1320,41 @@ function resetApp() {
     const errorTitle = document.getElementById('error-title');
     if (errorTitle) errorTitle.textContent = 'Něco se nepovedlo';
 
-    // Reset displays
-    document.querySelectorAll('.card').forEach(card => card.style.display = '');
-    document.getElementById('progress-container').style.display = '';
-    document.getElementById('step-error').style.display = 'none';
-    document.getElementById('verify-error-actions').style.display = 'none';
+    // Reset progress container display
+    const progressContainer = document.getElementById('progress-container');
+    if (progressContainer) progressContainer.style.display = '';
     
     // Reset spinners
     document.querySelectorAll('.verify-step').forEach(step => {
         step.className = 'verify-step';
-        step.querySelector('.verify-status').textContent = '';
+        const status = step.querySelector('.verify-status');
+        if (status) status.textContent = '';
     });
-    document.getElementById('rules-timer').style.opacity = '1';
+    const rulesTimer = document.getElementById('rules-timer');
+    if (rulesTimer) rulesTimer.style.opacity = '1';
 
     // Verify session again or redirect to start
     if (sessionToken) {
         verifyUserSession();
     } else {
-        setStep(1);
+        setStep(1, 'prev');
     }
 }
 
 // Toggle tutorial visibility
+// Toggle tutorial visibility with smooth container height transitions
 function toggleTutorial() {
     const container = document.getElementById('tutorial-container');
     const btn = document.getElementById('btn-learn-more');
     if (!container || !btn) return;
+
+    const cardContainer = document.querySelector('.card-container');
+    const currentHeight = cardContainer.offsetHeight;
+
+    // Fixed height during unfolding animation
+    cardContainer.style.height = `${currentHeight}px`;
+    cardContainer.style.overflow = 'hidden';
+    cardContainer.offsetHeight; // force reflow
 
     if (container.style.display === 'none' || container.classList.contains('closing')) {
         // OPENING
@@ -1267,6 +1373,15 @@ function toggleTutorial() {
         setTimeout(() => {
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
+
+        // Measure targeted scroll height and animate to it
+        const targetHeight = cardContainer.scrollHeight;
+        cardContainer.style.height = `${targetHeight}px`;
+
+        setTimeout(() => {
+            cardContainer.style.height = 'auto';
+            cardContainer.style.overflow = 'visible';
+        }, 600);
     } else {
         // CLOSING
         container.classList.add('closing');
@@ -1275,11 +1390,21 @@ function toggleTutorial() {
         play8bitSound('poof');
         spawnSmokePoof(container);
         
-        // Wait for fold animation to complete (400ms) before display none
+        // Measure targeted shrink height by temporarily hiding display
+        container.style.display = 'none';
+        const targetHeight = cardContainer.offsetHeight;
+        container.style.display = 'block';
+        cardContainer.offsetHeight; // force reflow
+
+        cardContainer.style.height = `${targetHeight}px`;
+
+        // Wait for fold animation to complete (400ms) before setting display none
         setTimeout(() => {
             if (container.classList.contains('closing')) {
                 container.style.display = 'none';
                 container.classList.remove('closing');
+                cardContainer.style.height = 'auto';
+                cardContainer.style.overflow = 'visible';
             }
         }, 400);
     }
@@ -1318,7 +1443,15 @@ function spawnSmokePoof(element) {
 }
 
 // Switch active tab in tutorial
+// Switch active tab in tutorial with container height transition
 function switchTab(tabId) {
+    const cardContainer = document.querySelector('.card-container');
+    const currentHeight = cardContainer.offsetHeight;
+
+    cardContainer.style.height = `${currentHeight}px`;
+    cardContainer.style.overflow = 'hidden';
+    cardContainer.offsetHeight; // force reflow
+
     // Update tab button classes
     const tabs = document.querySelectorAll('.tutorial-tabs .tab-btn');
     let activeBtn = null;
@@ -1340,6 +1473,15 @@ function switchTab(tabId) {
             pane.classList.remove('active');
         }
     });
+
+    // Measure new target height and animate to it
+    const targetHeight = cardContainer.scrollHeight;
+    cardContainer.style.height = `${targetHeight}px`;
+
+    setTimeout(() => {
+        cardContainer.style.height = 'auto';
+        cardContainer.style.overflow = 'visible';
+    }, 600);
 
     // Fire energy particles from tab button to elements inside the active pane
     if (activeBtn) {

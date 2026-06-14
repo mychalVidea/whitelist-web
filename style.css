@@ -274,65 +274,76 @@ body {
     color: var(--text-primary);
 }
 
-/* Card base */
+/* Card base & container slider system */
 .card-container {
-    position: relative;
-}
-
-.card {
-    display: none;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 36px 30px;
     backdrop-filter: blur(20px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    perspective: 1200px;
     position: relative;
-    animation: slideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    width: 100%;
+    overflow: hidden; /* reset to visible dynamically in JS */
+    transition: height 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.15s ease-out,
+                box-shadow 0.15s ease-out; /* smooth transition for 3D tilt */
+}
+
+.card-slider {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.card {
+    width: 100%;
+    flex-shrink: 0;
+    padding: 36px 30px;
+    position: relative;
+    display: block;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    opacity: 0.15;
+    transform: scale(0.94);
+    filter: blur(4px);
+    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+                opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+                filter 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .card.active {
-    display: block;
-}
-
-@keyframes slideIn {
-    0% {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+    pointer-events: auto;
 }
 
 .card-glow {
     position: absolute;
-    top: -50px;
+    top: 15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 200px;
-    height: 100px;
+    width: 260px;
+    height: 130px;
     background: radial-gradient(ellipse, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
     pointer-events: none;
+    z-index: 1;
 }
 
 .success-glow {
     background: radial-gradient(ellipse, var(--success-glow) 0%, transparent 70%);
-    top: 15px;
-    width: 260px;
-    height: 130px;
 }
 
 .error-glow {
     background: radial-gradient(ellipse, var(--error-glow) 0%, transparent 70%);
-    top: 15px;
-    width: 260px;
-    height: 130px;
 }
 
 .card-content {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -842,29 +853,7 @@ h2 {
 }
 
 /* Card Transitions */
-.card {
-    display: none;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.card.active {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.card.fade-out {
-    opacity: 0;
-    transform: translateY(-15px);
-}
-
-.card.fade-in {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
+/* Card Transitions are now handled by .card-slider flex container */
 
 /* Red cross styling for failed verify step */
 .verify-step.failed {
@@ -1506,85 +1495,7 @@ h2 {
 }
 
 /* 🕒 Better Step Transitions with 3D Y-Axis Swipes */
-.card-container {
-    perspective: 1200px;
-    position: relative;
-    width: 100%;
-}
-
-.card {
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    transition: transform 0.12s ease-out, box-shadow 0.12s ease-out; /* smooth transition for 3D tilt reset */
-}
-
-/* Slide animations going forward */
-.card.slide-out-left {
-    display: block !important;
-    animation: slideOutLeft 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-    pointer-events: none;
-}
-
-.card.slide-in-right {
-    display: block !important;
-    animation: slideInRight 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-}
-
-/* Slide animations going backward (Correct Nickname) */
-.card.slide-out-right {
-    display: block !important;
-    animation: slideOutRight 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-    pointer-events: none;
-}
-
-.card.slide-in-left {
-    display: block !important;
-    animation: slideInLeft 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-}
-
-@keyframes slideOutLeft {
-    0% {
-        opacity: 1;
-        transform: translateX(0) scale(1) rotateY(0deg);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-150px) scale(0.9) rotateY(-15deg);
-    }
-}
-
-@keyframes slideInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(150px) scale(0.9) rotateY(15deg);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1) rotateY(0deg);
-    }
-}
-
-@keyframes slideOutRight {
-    0% {
-        opacity: 1;
-        transform: translateX(0) scale(1) rotateY(0deg);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(150px) scale(0.9) rotateY(15deg);
-    }
-}
-
-@keyframes slideInLeft {
-    0% {
-        opacity: 0;
-        transform: translateX(-150px) scale(0.9) rotateY(-15deg);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1) rotateY(0deg);
-    }
-}
+/* Old slide keyframes replaced with flexbox-slider dynamic transforms */
 
 /* 💥 Block Break Debris Particles on Click */
 .block-particle {
@@ -1761,4 +1672,59 @@ h2 {
     z-index: 99999;
     opacity: 0.8;
     transition: transform 0.7s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 0.7s ease-out;
+}
+
+/* 🏷️ Server Version Highlight */
+.version-highlight {
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: var(--success-color) !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15) !important;
+    display: inline-block !important;
+}
+
+/* 📋 IP Copy Feedback Tooltip */
+.copy-tooltip {
+    position: fixed;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: #10b981;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    z-index: 100000;
+    pointer-events: none;
+    animation: popTooltip 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popTooltip {
+    0% {
+        transform: translate(-50%, 0) scale(0.7);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -10px) scale(1);
+        opacity: 1;
+    }
+}
+
+.copy-tooltip.fade-out {
+    opacity: 0;
+    transform: translate(-50%, -20px) scale(0.9);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Copied state on IP tag */
+.info-value.copyable.copied {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3) !important;
+    transform: scale(1.05) !important;
 }
