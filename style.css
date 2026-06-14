@@ -1498,3 +1498,164 @@ h2 {
         box-shadow: 0 0 25px rgba(255, 183, 3, 0.7);
     }
 }
+
+/* 🕒 Better Step Transitions with 3D Y-Axis Swipes */
+.card-container {
+    perspective: 1200px;
+    position: relative;
+    width: 100%;
+}
+
+.card {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 0.12s ease-out, box-shadow 0.12s ease-out; /* smooth transition for 3D tilt reset */
+}
+
+/* Slide animations going forward */
+.card.slide-out-left {
+    display: block !important;
+    animation: slideOutLeft 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+    pointer-events: none;
+}
+
+.card.slide-in-right {
+    display: block !important;
+    animation: slideInRight 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+/* Slide animations going backward (Correct Nickname) */
+.card.slide-out-right {
+    display: block !important;
+    animation: slideOutRight 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+    pointer-events: none;
+}
+
+.card.slide-in-left {
+    display: block !important;
+    animation: slideInLeft 0.45s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+@keyframes slideOutLeft {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotateY(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-150px) scale(0.9) rotateY(-15deg);
+    }
+}
+
+@keyframes slideInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(150px) scale(0.9) rotateY(15deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotateY(0deg);
+    }
+}
+
+@keyframes slideOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotateY(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(150px) scale(0.9) rotateY(15deg);
+    }
+}
+
+@keyframes slideInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-150px) scale(0.9) rotateY(-15deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotateY(0deg);
+    }
+}
+
+/* 💥 Block Break Debris Particles on Click */
+.block-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    pointer-events: none;
+    z-index: 100000;
+    opacity: 1;
+    transition: transform 0.6s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 0.6s ease-out;
+}
+
+/* 🏆 Minecraft Advancement Unlocked Toast Banner */
+.minecraft-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: #212121;
+    border: 3px solid #000;
+    border-top-color: #3d3d3d;
+    border-left-color: #3d3d3d;
+    border-right-color: #1a1a1a;
+    border-bottom-color: #1a1a1a;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 999999;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+    transform: translateY(-150%) scale(0.8);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s;
+    max-width: 360px;
+    opacity: 0;
+}
+
+.minecraft-toast.show {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.minecraft-toast.toast-out {
+    transform: translateY(-150%) scale(0.8);
+    opacity: 0;
+}
+
+.toast-icon-container {
+    width: 34px;
+    height: 34px;
+    background: #000;
+    border: 2px solid #3d3d3d;
+    border-bottom-color: #1a1a1a;
+    border-right-color: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.toast-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: left;
+}
+
+.toast-title {
+    color: #f7a300; /* Gold */
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toast-desc {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 12px;
+}

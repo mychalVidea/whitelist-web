@@ -128,24 +128,104 @@ function triggerConfetti() {
     animate();
 }
 
-// Multi-step navigation logic with smooth transition
-async function setStep(stepNum) {
-    currentStep = stepNum;
-    
+// 🕹️ Synthesized 8-bit Sound Effects (Web Audio API)
+let audioCtx = null;
+
+function play8bitSound(type) {
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        const now = audioCtx.currentTime;
+        
+        if (type === 'click') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+            
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } 
+        else if (type === 'error') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.setValueAtTime(120, now + 0.25);
+            
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } 
+        else if (type === 'levelup') {
+            // Sequence of 2 high-pitch chimes (G6 and C7) matching Minecraft XP ding
+            const chime1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            chime1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            
+            chime1.type = 'sine';
+            chime1.frequency.setValueAtTime(1567.98, now); // G6
+            gain1.gain.setValueAtTime(0.15, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            
+            chime1.start(now);
+            chime1.stop(now + 0.35);
+            
+            const chime2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            chime2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            
+            chime2.type = 'sine';
+            chime2.frequency.setValueAtTime(2093.00, now + 0.08); // C7
+            gain2.gain.setValueAtTime(0.18, now + 0.08);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            
+            chime2.start(now + 0.08);
+            chime2.stop(now + 0.45);
+        }
+    } catch (err) {
+        console.warn('Web Audio API is not supported or was blocked:', err);
+    }
+}
+
+// Multi-step navigation logic with Y-axis 3D slide transitions
+async function setStep(stepNum, direction = 'next') {
     const activeCard = document.querySelector('.card.active');
     const targetCard = document.getElementById(`step-${stepNum}`);
     
+    currentStep = stepNum;
+    
     if (activeCard && targetCard && activeCard !== targetCard) {
-        // Fade out active
-        activeCard.classList.add('fade-out');
-        await new Promise(r => setTimeout(r, 400));
-        activeCard.classList.remove('active', 'fade-out');
+        // Clear active tilt transform before swiping
+        activeCard.style.transform = '';
         
-        // Fade in target
-        targetCard.classList.add('fade-in');
-        targetCard.classList.add('active');
-        await new Promise(r => setTimeout(r, 50));
-        targetCard.classList.remove('fade-in');
+        const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+        const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+        
+        play8bitSound('click');
+        
+        activeCard.classList.add(outClass);
+        await new Promise(r => setTimeout(r, 450));
+        activeCard.classList.remove('active', outClass);
+        
+        targetCard.classList.add(inClass, 'active');
+        await new Promise(r => setTimeout(r, 450));
+        targetCard.classList.remove(inClass);
     } else {
         document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
         if (targetCard) targetCard.classList.add('active');
@@ -168,6 +248,128 @@ async function setStep(stepNum) {
             step.classList.add('active');
         } else {
             step.classList.remove('active');
+        }
+    });
+}
+
+// Navigation helpers for nickname correction
+function goBackToNick() {
+    if (rulesTimerInterval) {
+        clearInterval(rulesTimerInterval);
+    }
+    // Reset timer state
+    document.getElementById('rules-timer').style.opacity = '1';
+    const timerFill = document.getElementById('timer-fill');
+    if (timerFill) timerFill.setAttribute('stroke-dasharray', '0, 100');
+    const timerText = document.getElementById('timer-text');
+    if (timerText) timerText.textContent = '10';
+    const acceptBtn = document.getElementById('btn-accept-rules');
+    if (acceptBtn) acceptBtn.disabled = true;
+    const lockIcon = document.getElementById('btn-lock');
+    if (lockIcon) lockIcon.style.display = 'inline-block';
+    const firefly = document.getElementById('rules-firefly');
+    if (firefly) firefly.style.opacity = '0';
+    document.querySelectorAll('.rule-item').forEach(item => item.classList.remove('active'));
+
+    setStep(2, 'prev');
+}
+
+function goBackToNickDirectly() {
+    const prevError = document.getElementById('inline-verify-error');
+    if (prevError) prevError.remove();
+    document.getElementById('verify-error-actions').style.display = 'none';
+    
+    setStep(2, 'prev');
+}
+
+// 🏆 Minecraft Advancement Unlocked Toast Banner
+function showMinecraftToast(title, description, icon = '🏆') {
+    const existing = document.getElementById('mc-achievement-toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.id = 'mc-achievement-toast';
+    toast.className = 'minecraft-toast';
+    
+    toast.innerHTML = `
+        <div class="toast-icon-container">${icon}</div>
+        <div class="toast-text">
+            <span class="toast-title">${title}</span>
+            <span class="toast-desc">${description}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+        play8bitSound('levelup');
+    }, 300);
+    
+    setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 600);
+    }, 5500);
+}
+
+// 3D Card Tilt Effect
+function setupCardTilt() {
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const tiltX = (centerY - y) / centerY;
+            const tiltY = (x - centerX) / centerX;
+            
+            const maxTiltAngle = 8;
+            const rotateX = (tiltX * maxTiltAngle).toFixed(2);
+            const rotateY = (tiltY * maxTiltAngle).toFixed(2);
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+    });
+}
+
+// Minecraft block break click particles
+function setupBlockBreakParticles() {
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('button') && !e.target.closest('.copyable') && !e.target.closest('.source-option') && !e.target.closest('.tab-btn')) {
+            return;
+        }
+        
+        const particleCount = 14 + Math.floor(Math.random() * 8);
+        const colors = ['#553c23', '#866043', '#3c2d1e', '#ffb703', '#5865f2'];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const p = document.createElement('div');
+            p.className = 'block-particle';
+            
+            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            p.style.left = `${e.clientX}px`;
+            p.style.top = `${e.clientY}px`;
+            
+            document.body.appendChild(p);
+            
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 100 + 30;
+            const targetX = Math.cos(angle) * speed;
+            const targetY = Math.sin(angle) * speed + (Math.random() * 30 + 15);
+            
+            setTimeout(() => {
+                p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
+                p.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => p.remove(), 600);
         }
     });
 }
@@ -219,6 +421,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Load token
     sessionToken = paramToken || localStorage.getItem('whitelist_token');
+
+    // Setup 3D card perspective tilt and button block-break particles
+    setupCardTilt();
+    setupBlockBreakParticles();
 
     if (sessionToken) {
         localStorage.setItem('whitelist_token', sessionToken);
@@ -433,7 +639,7 @@ function submitNick() {
     if (!input || !select) return;
     selectedNick = input.value.trim();
     selectedSource = select.value;
-    setStep(3);
+    setStep(3, 'next');
     startRulesTimer();
 }
 
@@ -503,7 +709,7 @@ function startRulesTimer() {
 
 // Accept rules button handler
 function acceptRules() {
-    setStep(4);
+    setStep(4, 'next');
     runVerificationSteps();
 }
 
@@ -511,10 +717,9 @@ function acceptRules() {
 async function runVerificationSteps() {
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
-    // Clear previous inline errors/crosses if any
     const prevError = document.getElementById('inline-verify-error');
     if (prevError) prevError.remove();
-    document.getElementById('btn-verify-retry').style.display = 'none';
+    document.getElementById('verify-error-actions').style.display = 'none';
     
     // Reset classes
     document.querySelectorAll('.verify-step').forEach(step => {
@@ -560,7 +765,6 @@ async function runVerificationSteps() {
         const data = await response.json();
 
         if (response.status === 409) {
-            // Already whitelisted - show red cross and restart button directly inside step-4!
             vs3.classList.remove('current');
             vs3.classList.add('failed');
             vs3.querySelector('.verify-status').textContent = '❌';
@@ -576,8 +780,9 @@ async function runVerificationSteps() {
             errLabel.textContent = data.message;
             vs3.parentElement.appendChild(errLabel);
 
-            // Show retry button
-            document.getElementById('btn-verify-retry').style.display = 'block';
+            // Show error action buttons
+            document.getElementById('verify-error-actions').style.display = 'flex';
+            play8bitSound('error');
             return;
         }
 
@@ -627,7 +832,8 @@ async function runVerificationSteps() {
         errLabel.textContent = error.message;
         vs3.parentElement.appendChild(errLabel);
 
-        document.getElementById('btn-verify-retry').style.display = 'block';
+        document.getElementById('verify-error-actions').style.display = 'flex';
+        play8bitSound('error');
     }
 }
 
@@ -646,17 +852,19 @@ function copyToClipboard(text, element) {
 
 // Show success view
 function showSuccessState(alreadyExists = false, nick = '') {
-    setStep(5);
+    setStep(5, 'next');
     const title = document.getElementById('result-title');
     const desc = document.getElementById('result-desc');
 
     if (alreadyExists) {
         title.textContent = 'Už jsi na whitelistu!';
         desc.textContent = `Tvoje registrace pro nick "${nick}" je aktivní. Můžeš se ihned připojit.`;
+        showMinecraftToast('Výzva splněna!', 'Aktivní whitelist!');
     } else {
         title.textContent = 'Vítej na serveru!';
         desc.textContent = `Tvůj nick "${nick}" byl úspěšně přidán na whitelist.`;
         triggerConfetti();
+        showMinecraftToast('Výzva splněna!', 'Přidán na whitelist!');
     }
     
     // Trigger funny flying guide firefly collision hint
@@ -919,7 +1127,7 @@ function resetApp() {
     document.querySelectorAll('.card').forEach(card => card.style.display = '');
     document.getElementById('progress-container').style.display = '';
     document.getElementById('step-error').style.display = 'none';
-    document.getElementById('btn-verify-retry').style.display = 'none';
+    document.getElementById('verify-error-actions').style.display = 'none';
     
     // Reset spinners
     document.querySelectorAll('.verify-step').forEach(step => {

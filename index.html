@@ -205,6 +205,9 @@
                         <span class="btn-lock" id="btn-lock">🔒</span>
                         Přijímám pravidla
                     </button>
+                    <button class="btn btn-secondary" id="btn-back-to-nick" onclick="goBackToNick()" style="margin-top: 12px;">
+                        ‹ Opravit přezdívku
+                    </button>
                 </div>
             </section>
 
@@ -241,8 +244,10 @@
                             <span class="verify-status"></span>
                         </div>
                     </div>
-                    <button class="btn btn-secondary" id="btn-verify-retry" style="display:none; margin-top:20px;"
-                        onclick="resetApp()">Zkusit znovu</button>
+                    <div class="verify-error-actions" id="verify-error-actions" style="display:none; gap:12px; width:100%; margin-top:20px;">
+                        <button class="btn btn-primary" onclick="runVerificationSteps()">Zkusit znovu 🔄</button>
+                        <button class="btn btn-secondary" onclick="goBackToNickDirectly()">Opravit nick ✏️</button>
+                    </div>
                 </div>
             </section>
 
