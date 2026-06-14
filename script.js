@@ -204,6 +204,25 @@ function play8bitSound(type) {
             chime2.start(now + 0.08);
             chime2.stop(now + 0.45);
         }
+        else if (type.startsWith('note-')) {
+            const frequencies = [523.25, 587.33, 659.25, 783.99, 1046.50]; // C5, D5, E5, G5, C6 (Pentatonic Scale)
+            const idx = parseInt(type.split('-')[1]);
+            const freq = frequencies[idx - 1] || 523.25;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            
+            osc.start(now);
+            osc.stop(now + 0.35);
+        }
         else if (type === 'poof') {
             // White noise buffer for smoke poof
             const bufferSize = audioCtx.sampleRate * 0.15; // 0.15s
@@ -524,9 +543,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load token
     sessionToken = paramToken || localStorage.getItem('whitelist_token');
 
-    // Setup button block-break particles
+    // Setup button block-break particles and rules clicking
     setupBlockBreakParticles();
     setupInputListeners();
+    setupRulesClicking();
 
     if (sessionToken) {
         localStorage.setItem('whitelist_token', sessionToken);
@@ -747,8 +767,7 @@ function submitNick() {
     showMinecraftToast('Dosažen pokrok!', 'Přezdívka nastavena!', '🎮');
 }
 
-// Rules reading countdown & firefly guide logic
-let rulesTimerInterval;
+// Interactive rules confirm and progress indicator
 function startRulesTimer() {
     const timerFill = document.getElementById('timer-fill');
     const timerText = document.getElementById('timer-text');
@@ -758,57 +777,130 @@ function startRulesTimer() {
 
     if (!timerFill || !acceptBtn) return;
 
-    let secondsLeft = 10;
+    // Reset read status if they go back and forth
+    document.querySelectorAll('.rule-item').forEach(item => {
+        item.classList.remove('read');
+    });
+    
     acceptBtn.disabled = true;
     if (lockIcon) lockIcon.style.display = 'inline-block';
-    if (firefly) firefly.style.opacity = '0';
+    
+    const timerLabel = document.querySelector('.timer-label');
+    if (timerLabel) timerLabel.textContent = 'Kliknutím potvrď všechna pravidla...';
+    
+    const rulesTimer = document.getElementById('rules-timer');
+    if (rulesTimer) rulesTimer.style.opacity = '1';
+    
+    updateRulesProgress();
+}
 
-    if (rulesTimerInterval) clearInterval(rulesTimerInterval);
+// Update the progress circle and text based on checked rules
+function updateRulesProgress() {
+    const timerFill = document.getElementById('timer-fill');
+    const timerText = document.getElementById('timer-text');
+    const totalRules = document.querySelectorAll('.rule-item').length;
+    const readRules = document.querySelectorAll('.rule-item.read').length;
 
-    function updateTimer() {
-        if (timerText) timerText.textContent = secondsLeft;
-        
-        // Progress ring fill
-        const percentage = ((10 - secondsLeft) / 10) * 100;
+    if (timerText) timerText.textContent = `${readRules}/${totalRules}`;
+    
+    if (timerFill) {
+        const percentage = (readRules / totalRules) * 100;
         timerFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
-
-        // Highlight bodies and guide firefly every 2 seconds
-        // 10s total, 5 rules -> 2 seconds per rule
-        const ruleIdx = Math.min(5, Math.floor((10 - secondsLeft) / 2) + 1);
-        
-        document.querySelectorAll('.rule-item').forEach((item, index) => {
-            if (index + 1 === ruleIdx) {
-                item.classList.add('active');
-                
-                // Position the firefly smoothly next to the active rule
-                if (firefly) {
-                    const rect = item.getBoundingClientRect();
-                    const containerRect = item.parentElement.getBoundingClientRect();
-                    const topPos = rect.top - containerRect.top + rect.height / 2 - 3;
-                    const leftPos = rect.left - containerRect.left - 15;
-                    
-                    firefly.style.opacity = '1';
-                    firefly.style.top = `${topPos}px`;
-                    firefly.style.left = `${leftPos}px`;
-                }
-            } else {
-                item.classList.remove('active');
-            }
-        });
-
-        if (secondsLeft <= 0) {
-            clearInterval(rulesTimerInterval);
-            acceptBtn.disabled = false;
-            if (lockIcon) lockIcon.style.display = 'none';
-            document.getElementById('rules-timer').style.opacity = '0.3';
-            if (firefly) firefly.style.opacity = '0';
-            document.querySelectorAll('.rule-item').forEach(item => item.classList.remove('active'));
-        }
-        secondsLeft--;
     }
 
-    updateTimer();
-    rulesTimerInterval = setInterval(updateTimer, 1000);
+    updateRulesFirefly();
+}
+
+// Move guide firefly to the first unread rule item
+function updateRulesFirefly() {
+    const firefly = document.getElementById('rules-firefly');
+    if (!firefly) return;
+
+    const firstUnread = document.querySelector('.rule-item:not(.read)');
+    if (firstUnread) {
+        const rect = firstUnread.getBoundingClientRect();
+        const containerRect = firstUnread.parentElement.getBoundingClientRect();
+        const topPos = rect.top - containerRect.top + rect.height / 2 - 3;
+        const leftPos = rect.left - containerRect.left - 15;
+        
+        firefly.style.opacity = '1';
+        firefly.style.top = `${topPos}px`;
+        firefly.style.left = `${leftPos}px`;
+    } else {
+        firefly.style.opacity = '0';
+    }
+}
+
+// Attaches click listeners to rules to confirm them individually
+function setupRulesClicking() {
+    document.querySelectorAll('.rule-item').forEach(item => {
+        // Enforce pointer cursor on hover
+        item.style.cursor = 'pointer';
+        
+        // Remove existing listeners if duplicate by replacing the element or standard handling
+        item.addEventListener('click', () => {
+            if (item.classList.contains('read')) return;
+
+            const ruleIdx = parseInt(item.getAttribute('data-rule'));
+            item.classList.add('read');
+            play8bitSound(`note-${ruleIdx}`);
+            
+            // Spawn fireworks sparkles on the clicked rule
+            const rect = item.getBoundingClientRect();
+            spawnEpicSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+            updateRulesProgress();
+
+            const totalRules = document.querySelectorAll('.rule-item').length;
+            const readRules = document.querySelectorAll('.rule-item.read').length;
+
+            if (readRules === totalRules) {
+                const acceptBtn = document.getElementById('btn-accept-rules');
+                const lockIcon = document.getElementById('btn-lock');
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (lockIcon) lockIcon.style.display = 'none';
+                
+                const timerLabel = document.querySelector('.timer-label');
+                if (timerLabel) timerLabel.textContent = 'Pravidla přečtena! 🎉';
+                
+                const rulesTimer = document.getElementById('rules-timer');
+                if (rulesTimer) rulesTimer.style.opacity = '0.3';
+
+                play8bitSound('levelup');
+                triggerConfetti();
+            }
+        });
+    });
+}
+
+// Spawns epic fireworks-style burst of sparkles in a circle
+function spawnEpicSparkles(x, y) {
+    const colors = ['#ffb703', '#ff9f1c', '#10b981', '#34d399', '#ffffff'];
+    const particleCount = 30;
+    for (let i = 0; i < particleCount; i++) {
+        const p = document.createElement('div');
+        p.className = 'sparkle-particle';
+        p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        
+        p.style.width = '6px';
+        p.style.height = '6px';
+        
+        document.body.appendChild(p);
+        
+        const angle = (i / particleCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+        const speed = Math.random() * 110 + 60;
+        const targetX = Math.cos(angle) * speed;
+        const targetY = Math.sin(angle) * speed;
+        
+        setTimeout(() => {
+            p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
+            p.style.opacity = '0';
+        }, 10);
+        
+        setTimeout(() => p.remove(), 600);
+    }
 }
 
 // Accept rules button handler
@@ -946,10 +1038,21 @@ async function runVerificationSteps() {
 // Copy server IP address helper with satisfying feedback and green sparkles
 function copyToClipboard(text, element) {
     navigator.clipboard.writeText(text).then(() => {
-        play8bitSound('click');
+        play8bitSound('levelup');
         
         // Add copied class to trigger green highlight bounce
         element.classList.add('copied');
+
+        // Shake the card container for impact
+        const cardContainer = document.querySelector('.card-container');
+        if (cardContainer) {
+            cardContainer.classList.remove('container-shake');
+            cardContainer.offsetHeight; // force reflow
+            cardContainer.classList.add('container-shake');
+            setTimeout(() => {
+                cardContainer.classList.remove('container-shake');
+            }, 600);
+        }
 
         // Create a floating feedback tooltip above the element
         const rect = element.getBoundingClientRect();
@@ -962,8 +1065,19 @@ function copyToClipboard(text, element) {
         tooltip.style.top = `${rect.top - 18}px`;
         document.body.appendChild(tooltip);
 
-        // Spawn a burst of green particles
-        spawnGreenSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        // Spawn epic circular sparkles firework explosion
+        spawnEpicSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        // Highlight version row target after copy completes
+        const versionVal = document.getElementById('server-version');
+        if (versionVal && !versionVal.classList.contains('version-highlight')) {
+            setTimeout(() => {
+                versionVal.classList.add('version-highlight');
+                const vRect = versionVal.getBoundingClientRect();
+                spawnEpicSparkles(vRect.left + vRect.width / 2, vRect.top + vRect.height / 2);
+                play8bitSound('levelup');
+            }, 450);
+        }
 
         // Clean up copied class and tooltip after delay
         setTimeout(() => {
@@ -977,32 +1091,6 @@ function copyToClipboard(text, element) {
     });
 }
 
-// Spawns green sparkle particles at the specified coordinates
-function spawnGreenSparkles(x, y) {
-    const colors = ['#10b981', '#34d399', '#059669', '#ffffff'];
-    for (let i = 0; i < 14; i++) {
-        const p = document.createElement('div');
-        p.className = 'sparkle-particle';
-        
-        p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        p.style.left = `${x}px`;
-        p.style.top = `${y}px`;
-        p.style.boxShadow = `0 0 8px ${colors[0]}`;
-        document.body.appendChild(p);
-
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 45 + 15;
-        const targetX = Math.cos(angle) * dist;
-        const targetY = Math.sin(angle) * dist - 8;
-
-        setTimeout(() => {
-            p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
-            p.style.opacity = '0';
-        }, 10);
-
-        setTimeout(() => p.remove(), 800);
-    }
-}
 
 // Show success view
 function showSuccessState(alreadyExists = false, nick = '') {
