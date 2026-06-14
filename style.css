@@ -320,10 +320,16 @@ body {
 
 .success-glow {
     background: radial-gradient(ellipse, var(--success-glow) 0%, transparent 70%);
+    top: 15px;
+    width: 260px;
+    height: 130px;
 }
 
 .error-glow {
     background: radial-gradient(ellipse, var(--error-glow) 0%, transparent 70%);
+    top: 15px;
+    width: 260px;
+    height: 130px;
 }
 
 .card-content {
@@ -1684,28 +1690,33 @@ h2 {
     background-color: rgba(255, 255, 255, 0.01) !important;
     text-shadow: none !important;
     box-shadow: none !important;
-    transition: color 0.5s ease, border-color 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+    transition: none !important; /* Instant change to gold on particle hit */
 }
 
-/* Gold flash morph state */
+/* Gold flash morph state for plain text (strong, etc.) */
 .gold-flash {
-    animation: goldFlashBurst 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation: goldFlashBurst 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 @keyframes goldFlashBurst {
     0% {
         color: #fff !important;
-        background-color: rgba(255, 183, 3, 0.5) !important;
+        text-shadow: 0 0 12px var(--accent-glow) !important;
+    }
+}
+
+/* Gold flash morph state for elements with shapes (step-num, map button) */
+.step-num.gold-flash,
+.btn-map-link.gold-flash {
+    animation: goldFlashBurstBg 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes goldFlashBurstBg {
+    0% {
+        color: #fff !important;
+        background-color: rgba(255, 183, 3, 0.6) !important;
         border-color: #fff !important;
         box-shadow: 0 0 25px 8px var(--accent-glow) !important;
-        transform: scale(1.15);
-    }
-    100% {
-        color: inherit;
-        background-color: inherit;
-        border-color: inherit;
-        box-shadow: inherit;
-        transform: scale(1);
     }
 }
 

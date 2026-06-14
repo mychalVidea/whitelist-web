@@ -486,6 +486,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Setup 3D card perspective tilt and button block-break particles
     setupCardTilt();
     setupBlockBreakParticles();
+    setupInputListeners();
 
     if (sessionToken) {
         localStorage.setItem('whitelist_token', sessionToken);
@@ -528,7 +529,6 @@ async function verifyUserSession() {
                 showSuccessState(true, data.existingNick);
             } else {
                 setStep(2);
-                setupInputListeners();
             }
         } else {
             throw new Error(data.message || 'Nepodařilo se ověřit uživatele.');
@@ -952,7 +952,7 @@ function triggerFlyingGuide() {
         const targetX = rect.left + rect.width / 2;
         const targetY = rect.top + rect.height / 2;
 
-        const duration = 2200; // 2.2 seconds flight
+        const duration = 1100; // 1.1 seconds flight
         const startTime = performance.now();
 
         let lastX = startX;
@@ -1037,7 +1037,7 @@ function triggerFlyingGuide() {
             requestAnimationFrame(animate);
         }
         requestAnimationFrame(animate);
-    }, 2500);
+    }, 400);
 }
 
 
