@@ -272,7 +272,14 @@ async function setStep(stepNum, direction = 'next') {
         cardSlider.style.transition = 'none';
         cards.forEach(c => c.style.transition = 'none');
         
-        cards.forEach(c => c.classList.remove('active'));
+        cards.forEach(c => {
+            c.classList.remove('active');
+            if (c !== targetCard) {
+                c.classList.add('collapsed');
+            } else {
+                c.classList.remove('collapsed');
+            }
+        });
         targetCard.classList.add('active');
         
         cardSlider.style.transform = `translateX(-${targetIndex * 100}%)`;
@@ -301,6 +308,9 @@ async function setStep(stepNum, direction = 'next') {
             // Smoothly autoscroll the card container into the viewport center
             cardContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
+            // Temporarily expand the target card to measure its natural content height
+            targetCard.classList.remove('collapsed');
+            
             const currentHeight = activeCard.offsetHeight;
             const targetHeight = targetCard.offsetHeight;
             
@@ -320,6 +330,13 @@ async function setStep(stepNum, direction = 'next') {
             
             // Wait for 600ms transition to complete
             transitionTimeout = setTimeout(() => {
+                // Collapse all inactive cards so they don't stretch the flexbox container height
+                cards.forEach(c => {
+                    if (c !== targetCard) {
+                        c.classList.add('collapsed');
+                    }
+                });
+                
                 cardContainer.style.height = 'auto';
                 cardContainer.style.overflow = 'visible';
                 transitionTimeout = null;

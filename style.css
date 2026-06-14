@@ -312,6 +312,13 @@ body {
     pointer-events: auto;
 }
 
+.card.collapsed {
+    height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+}
+
 .card-glow {
     position: absolute;
     top: 15px;
