@@ -219,17 +219,46 @@ async function setStep(stepNum, direction = 'next') {
         
         play8bitSound('click');
         
-        activeCard.classList.add(outClass);
-        await new Promise(r => setTimeout(r, 450));
-        activeCard.classList.remove('active', outClass);
+        // Ensure both are displayed and positioned correctly for overlapping transition
+        // Make the active card absolute so it doesn't push the target card down
+        activeCard.style.position = 'absolute';
+        activeCard.style.width = '100%';
+        activeCard.style.top = '0';
+        activeCard.style.left = '0';
+        activeCard.style.zIndex = '1';
         
+        targetCard.style.position = 'relative';
+        targetCard.style.zIndex = '2';
+        
+        // Start animations simultaneously
+        activeCard.classList.add(outClass);
         targetCard.classList.add(inClass, 'active');
+        
         await new Promise(r => setTimeout(r, 450));
+        
+        // Clean up
+        activeCard.classList.remove('active', outClass);
+        activeCard.style.position = '';
+        activeCard.style.width = '';
+        activeCard.style.top = '';
+        activeCard.style.left = '';
+        activeCard.style.zIndex = '';
+        
         targetCard.classList.remove(inClass);
+        targetCard.style.position = '';
+        targetCard.style.zIndex = '';
     } else {
-        document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.remove('active');
+            card.style.position = '';
+            card.style.width = '';
+            card.style.top = '';
+            card.style.left = '';
+            card.style.zIndex = '';
+        });
         if (targetCard) targetCard.classList.add('active');
     }
+
 
     // Update progress bar width
     const progressFill = document.getElementById('progress-fill');
@@ -903,16 +932,25 @@ function triggerFlyingGuide() {
                 // Collision!
                 firefly.remove();
                 
-                // Set the firefly at the hit location for dizzy stage
-                const dizzyFirefly = document.createElement('div');
-                dizzyFirefly.className = 'flying-guide firefly-dizzy';
-                dizzyFirefly.style.left = `${targetX - 4}px`;
-                dizzyFirefly.style.top = `${targetY - 20}px`;
-                document.body.appendChild(dizzyFirefly);
+                // Create ripple element inside button
+                const ripple = document.createElement('div');
+                ripple.className = 'btn-ripple';
+                ripple.style.width = '240px';
+                ripple.style.height = '240px';
+                ripple.style.left = '50%';
+                ripple.style.top = '50%';
+                btn.appendChild(ripple);
 
+                // Add classes for glow and shake
                 btn.classList.add('button-hit-shake');
                 btn.classList.add('btn-glow-active');
                 
+                // Animate ripple scale and fade
+                requestAnimationFrame(() => {
+                    ripple.style.transform = 'translate(-50%, -50%) scale(2.8)';
+                    ripple.style.opacity = '0';
+                });
+
                 // Spawn comic-style bubble
                 const bubble = document.createElement('div');
                 bubble.className = 'collision-bubble';
@@ -925,71 +963,11 @@ function triggerFlyingGuide() {
                 // Spawn sparkles
                 spawnSparkles(targetX, targetY);
                 
-                // Shake end
+                // Cleanup ripple and shake class after completion
                 setTimeout(() => {
                     btn.classList.remove('button-hit-shake');
-                }, 600);
-
-                // Dizzy orbiting stars
-                const stars = [];
-                for (let i = 0; i < 3; i++) {
-                    const star = document.createElement('div');
-                    star.className = 'dizzy-star';
-                    star.textContent = '💫';
-                    document.body.appendChild(star);
-                    stars.push(star);
-                }
-
-                let dizzyTime = 0;
-                const dizzyInterval = setInterval(() => {
-                    dizzyTime += 0.08;
-                    const bRect = dizzyFirefly.getBoundingClientRect();
-                    const cx = bRect.left + bRect.width / 2;
-                    const cy = bRect.top;
-                    
-                    stars.forEach((star, index) => {
-                        const angle = dizzyTime + (index * Math.PI * 2 / 3);
-                        const rx = 18;
-                        const ry = 6;
-                        const sx = cx + Math.cos(angle) * rx;
-                        const sy = cy + Math.sin(angle) * ry - 5;
-                        star.style.left = `${sx}px`;
-                        star.style.top = `${sy}px`;
-                        star.style.transform = `translate(-50%, -50%) rotate(${dizzyTime * 80}deg)`;
-                    });
-                }, 30);
-
-                // Fall down after 1.4 seconds
-                setTimeout(() => {
-                    clearInterval(dizzyInterval);
-                    stars.forEach(s => s.remove());
-                    dizzyFirefly.classList.remove('firefly-dizzy');
-
-                    let fallY = targetY - 20;
-                    let fallX = targetX - 4;
-                    let vy = -3;
-                    let vx = -1.5;
-                    const gravity = 0.35;
-                    let fallRotation = 0;
-
-                    function fall() {
-                        vy += gravity;
-                        fallX += vx;
-                        fallY += vy;
-                        fallRotation += 12;
-
-                        dizzyFirefly.style.left = `${fallX}px`;
-                        dizzyFirefly.style.top = `${fallY}px`;
-                        dizzyFirefly.style.transform = `rotate(${fallRotation}deg) scaleY(-1)`;
-
-                        if (fallY < window.innerHeight + 50) {
-                            requestAnimationFrame(fall);
-                        } else {
-                            dizzyFirefly.remove();
-                        }
-                    }
-                    requestAnimationFrame(fall);
-                }, 1400);
+                    ripple.remove();
+                }, 800);
 
                 return;
             }
@@ -1054,6 +1032,96 @@ function spawnSparkles(x, y) {
             p.remove();
         }, 900);
     }
+}
+
+// Sparkle XP fireflies flying to target elements
+function flyEnergyParticle(startX, startY, targetElement) {
+    const particle = document.createElement('div');
+    particle.className = 'energy-particle';
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    document.body.appendChild(particle);
+
+    const startTime = performance.now();
+    const duration = 700 + Math.random() * 300; // 0.7s to 1.0s flight time
+
+    // Arc path offsets
+    const rect = targetElement.getBoundingClientRect();
+    const targetX = rect.left + rect.width / 2;
+    const targetY = rect.top + rect.height / 2;
+
+    const midX = (startX + targetX) / 2;
+    const midY = (startY + targetY) / 2;
+    const offsetX = (Math.random() - 0.5) * 160;
+    const offsetY = -80 - Math.random() * 100;
+    const cpX = midX + offsetX;
+    const cpY = midY + offsetY;
+
+    function animate(time) {
+        const elapsed = time - startTime;
+        const t = Math.min(elapsed / duration, 1);
+
+        // Dynamically compute target in case of resize/scrolling during transit
+        const currentRect = targetElement.getBoundingClientRect();
+        const curTargetX = currentRect.left + currentRect.width / 2;
+        const curTargetY = currentRect.top + currentRect.height / 2;
+
+        // Quadratic Bezier interpolation
+        const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * cpX + t * t * curTargetX;
+        const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * cpY + t * t * curTargetY;
+
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+
+        if (t < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            particle.remove();
+
+            // Light up target element
+            targetElement.classList.remove('energy-target-dimmed');
+            targetElement.classList.add('gold-flash');
+            
+            // Spawn gold sparkles explosion
+            spawnSparkles(curTargetX, curTargetY);
+            
+            // Trigger 8-bit XP/click chime sound
+            play8bitSound('click');
+
+            setTimeout(() => {
+                targetElement.classList.remove('gold-flash');
+            }, 800);
+        }
+    }
+    requestAnimationFrame(animate);
+}
+
+// Spreads energy particles to all gold elements in selected tutorial section
+function triggerTutorialEnergy(sourceElement, containerSelector) {
+    if (!sourceElement) return;
+
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+
+    // Target elements: step numbers, strong tags, map links
+    const targets = Array.from(container.querySelectorAll('.step-num, strong, .btn-map-link'));
+    if (targets.length === 0) return;
+
+    const sourceRect = sourceElement.getBoundingClientRect();
+    const startX = sourceRect.left + sourceRect.width / 2;
+    const startY = sourceRect.top + sourceRect.height / 2;
+
+    // Dim all elements first
+    targets.forEach(target => {
+        target.classList.add('energy-target-dimmed');
+    });
+
+    // Fire flying fireflies sequentially
+    targets.forEach((target, index) => {
+        setTimeout(() => {
+            flyEnergyParticle(startX, startY, target);
+        }, index * 80);
+    });
 }
 
 // Show error panel view
@@ -1154,6 +1222,11 @@ function toggleTutorial() {
         container.style.display = 'block';
         btn.textContent = 'Skrýt návod 📖';
         
+        // Wait for unfold animation to complete before running energy particles
+        setTimeout(() => {
+            triggerTutorialEnergy(btn, '#pane-claim');
+        }, 700);
+
         // Scroll to the tutorial container smoothly
         setTimeout(() => {
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1168,9 +1241,11 @@ function toggleTutorial() {
 function switchTab(tabId) {
     // Update tab button classes
     const tabs = document.querySelectorAll('.tutorial-tabs .tab-btn');
+    let activeBtn = null;
     tabs.forEach(btn => {
         if (btn.getAttribute('onclick').includes(tabId)) {
             btn.classList.add('active');
+            activeBtn = btn;
         } else {
             btn.classList.remove('active');
         }
@@ -1185,4 +1260,88 @@ function switchTab(tabId) {
             pane.classList.remove('active');
         }
     });
+
+    // Fire energy particles from tab button to elements inside the active pane
+    if (activeBtn) {
+        triggerTutorialEnergy(activeBtn, `#pane-${tabId}`);
+    }
 }
+
+
+// Reset whitelisted nick on backend and go back to step 2
+async function resetWhitelistedNick() {
+    const btn = document.getElementById('btn-success-correct-nick');
+    if (!btn) return;
+
+    if (!confirm('Opravdu si přeješ opravit přezdívku? Budeš odebrán z whitelistu.')) {
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Odebírám... ⏳';
+
+        const res = await fetch(`${API_BASE_URL}/api/whitelist/reset`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionToken}`
+            }
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+            // Reset input values
+            const nickInput = document.getElementById('mc-nick-input');
+            if (nickInput) {
+                nickInput.value = '';
+                nickInput.dispatchEvent(new Event('input'));
+            }
+            
+            // Clear source dropdown selection
+            const sourceSelect = document.getElementById('mc-source-select');
+            if (sourceSelect) {
+                sourceSelect.value = '';
+                sourceSelect.dispatchEvent(new Event('change'));
+            }
+            
+            const triggerText = document.getElementById('source-trigger-text');
+            if (triggerText) {
+                triggerText.textContent = 'Vyber možnost...';
+            }
+            
+            const dropdown = document.getElementById('custom-source-select');
+            if (dropdown) {
+                dropdown.classList.remove('selected');
+                dropdown.querySelectorAll('.source-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
+
+            // Hide tutorial if open
+            const tutorial = document.getElementById('tutorial-container');
+            if (tutorial) {
+                tutorial.style.display = 'none';
+                const learnMoreBtn = document.getElementById('btn-learn-more');
+                if (learnMoreBtn) {
+                    learnMoreBtn.textContent = 'Dozvědět se více (Jak hrát?) 📖';
+                }
+            }
+
+            // Go back to Step 2
+            await setStep(2, 'prev');
+            
+            showMinecraftToast('Whitelist resetován', 'Můžeš zadat nový nick!', '🔄');
+        } else {
+            throw new Error(data.message || 'Nepodařilo se resetovat whitelist.');
+        }
+    } catch (err) {
+        alert(err.message || 'Chyba při komunikaci s API.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Opravit přezdívku ✏️';
+    }
+}
+

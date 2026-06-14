@@ -1659,3 +1659,64 @@ h2 {
     font-weight: 600;
     font-size: 12px;
 }
+
+/* Button Ripple morph effect */
+.btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 183, 3, 0.8) 0%, rgba(255, 183, 3, 0) 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.8;
+    z-index: 0;
+    transition: transform 0.8s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 0.8s ease-out;
+}
+
+#btn-learn-more {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Energy target elements default / dimmed state */
+.energy-target-dimmed {
+    color: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.01) !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    transition: color 0.5s ease, border-color 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Gold flash morph state */
+.gold-flash {
+    animation: goldFlashBurst 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes goldFlashBurst {
+    0% {
+        color: #fff !important;
+        background-color: rgba(255, 183, 3, 0.5) !important;
+        border-color: #fff !important;
+        box-shadow: 0 0 25px 8px var(--accent-glow) !important;
+        transform: scale(1.15);
+    }
+    100% {
+        color: inherit;
+        background-color: inherit;
+        border-color: inherit;
+        box-shadow: inherit;
+        transform: scale(1);
+    }
+}
+
+/* Energy particle style */
+.energy-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px 5px var(--accent), 0 0 4px 1px #fff;
+    pointer-events: none;
+    z-index: 10000;
+}
