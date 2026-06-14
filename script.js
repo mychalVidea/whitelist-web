@@ -298,6 +298,9 @@ async function setStep(stepNum, direction = 'next') {
         if (activeCard && activeCard !== targetCard) {
             play8bitSound('click');
             
+            // Smoothly autoscroll the card container into the viewport center
+            cardContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
             const currentHeight = activeCard.offsetHeight;
             const targetHeight = targetCard.offsetHeight;
             
