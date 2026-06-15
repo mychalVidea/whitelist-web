@@ -60,13 +60,197 @@ initParticles();
 
 function animateParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
-        particlesArray[i].draw();
+    for (let i = particlesArray.length - 1; i >= 0; i--) {
+        const p = particlesArray[i];
+        p.update();
+        p.draw();
+        // Remove temporary morph sparks once they fade out completely
+        if (p.opacity !== undefined && p.opacity <= 0) {
+            particlesArray.splice(i, 1);
+        }
     }
     requestAnimationFrame(animateParticles);
 }
 animateParticles();
+
+// 🌀 Step transition morphing animation logic (FLIP technique)
+class MorphSparkParticle {
+    constructor(x, y) {
+        this.x = x + (Math.random() * 20 - 10);
+        this.y = y + (Math.random() * 20 - 10);
+        this.size = Math.random() * 3.5 + 1.5;
+        
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 2.5 + 0.5;
+        this.speedX = Math.cos(angle) * speed;
+        this.speedY = Math.sin(angle) * speed;
+        
+        this.opacity = 1;
+        this.color = Math.random() > 0.5 ? '#ffb703' : '#10b981'; // Gold and emerald
+        this.fade = Math.random() * 0.03 + 0.02; // Fades out in about 20-30 frames
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.opacity -= this.fade;
+        if (this.opacity < 0) this.opacity = 0;
+    }
+    draw() {
+        if (this.opacity <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+function getStepMorphElement(stepNum) {
+    if (stepNum === 1) {
+        return document.querySelector('#step-1 .step-icon');
+    } else if (stepNum === 2) {
+        return document.getElementById('mc-head-preview');
+    } else if (stepNum === 3) {
+        return document.querySelector('#step-3 .step-icon');
+    } else if (stepNum === 4) {
+        return document.querySelector('#step-4 .step-icon');
+    } else if (stepNum === 5) {
+        return document.getElementById('result-icon');
+    }
+    return null;
+}
+
+function morphElement(sourceStep, targetStep) {
+    const sourceEl = getStepMorphElement(sourceStep);
+    const targetEl = getStepMorphElement(targetStep);
+    if (!sourceEl || !targetEl) return;
+
+    // Measure starting position
+    const sourceRect = sourceEl.getBoundingClientRect();
+
+    // Find the container cards
+    const sourceCard = document.getElementById(sourceStep === 'error' ? 'step-error' : `step-${sourceStep}`);
+    const targetCard = document.getElementById(targetStep === 'error' ? 'step-error' : `step-${targetStep}`);
+    if (!sourceCard || !targetCard) return;
+
+    // Temporarily ensure targetCard is active/visible in layout to measure relative offsets
+    const wasCollapsed = targetCard.classList.contains('collapsed');
+    targetCard.classList.remove('collapsed');
+    
+    // Force a minor reflow to get correct client rects
+    targetCard.offsetHeight;
+    
+    const targetCardRect = targetCard.getBoundingClientRect();
+    const targetElRect = targetEl.getBoundingClientRect();
+    
+    // Relative coordinates of the morph target in targetCard
+    const relLeft = targetElRect.left - targetCardRect.left;
+    const relTop = targetElRect.top - targetCardRect.top;
+    
+    // Restore layout classes
+    if (wasCollapsed) {
+        targetCard.classList.add('collapsed');
+    }
+
+    // Target final coordinates are computed relative to where the sourceCard is right now
+    const sourceCardRect = sourceCard.getBoundingClientRect();
+    const finalLeft = sourceCardRect.left + relLeft;
+    const finalTop = sourceCardRect.top + relTop;
+
+    // Create the ghost element
+    const ghost = document.createElement('div');
+    ghost.className = 'morph-ghost';
+
+    const sourceStyle = window.getComputedStyle(sourceEl);
+    const targetStyle = window.getComputedStyle(targetEl);
+
+    // Initial styles from source
+    ghost.style.left = `${sourceRect.left}px`;
+    ghost.style.top = `${sourceRect.top}px`;
+    ghost.style.width = `${sourceRect.width}px`;
+    ghost.style.height = `${sourceRect.height}px`;
+    ghost.style.borderRadius = sourceStyle.borderRadius;
+    ghost.style.background = sourceStyle.background;
+    ghost.style.border = sourceStyle.border;
+    ghost.style.boxShadow = sourceStyle.boxShadow;
+    ghost.style.color = sourceStyle.color;
+
+    // Setup cross-fade contents
+    const sourceClone = sourceEl.cloneNode(true);
+    const targetClone = targetEl.cloneNode(true);
+    
+    // Ensure clones are visible
+    sourceClone.style.visibility = 'visible';
+    sourceClone.style.opacity = '1';
+    sourceClone.style.margin = '0';
+    targetClone.style.visibility = 'visible';
+    targetClone.style.opacity = '1';
+    targetClone.style.margin = '0';
+
+    const srcWrapper = document.createElement('div');
+    srcWrapper.className = 'ghost-inner source-state';
+    srcWrapper.style.cssText = 'position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; transition: opacity 0.25s ease; opacity: 1;';
+    srcWrapper.appendChild(sourceClone);
+
+    const tgtWrapper = document.createElement('div');
+    tgtWrapper.className = 'ghost-inner target-state';
+    tgtWrapper.style.cssText = 'position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; transition: opacity 0.25s ease; opacity: 0;';
+    tgtWrapper.appendChild(targetClone);
+
+    ghost.appendChild(srcWrapper);
+    ghost.appendChild(tgtWrapper);
+    document.body.appendChild(ghost);
+
+    // Hide real elements during transition
+    sourceEl.style.opacity = '0';
+    targetEl.style.opacity = '0';
+
+    // Force reflow
+    ghost.offsetHeight;
+
+    // Animate to target styles and position
+    ghost.style.left = `${finalLeft}px`;
+    ghost.style.top = `${finalTop}px`;
+    ghost.style.width = `${targetElRect.width}px`;
+    ghost.style.height = `${targetElRect.height}px`;
+    ghost.style.borderRadius = targetStyle.borderRadius;
+    ghost.style.background = targetStyle.background;
+    ghost.style.border = targetStyle.border;
+    ghost.style.boxShadow = targetStyle.boxShadow;
+    ghost.style.color = targetStyle.color;
+
+    // Cross-fade inner content
+    srcWrapper.style.opacity = '0';
+    tgtWrapper.style.opacity = '1';
+
+    // Spawn sparks trail
+    const startTime = performance.now();
+    const particleInterval = setInterval(() => {
+        const rect = ghost.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        for (let i = 0; i < 2; i++) {
+            particlesArray.push(new MorphSparkParticle(centerX, centerY));
+        }
+
+        if (performance.now() - startTime >= 600) {
+            clearInterval(particleInterval);
+        }
+    }, 25);
+
+    // Clean up
+    setTimeout(() => {
+        clearInterval(particleInterval);
+        targetEl.style.opacity = '';
+        sourceEl.style.opacity = '';
+        ghost.remove();
+    }, 600);
+}
 
 // Confetti effect helper
 // Confetti effect helper - premium Minecraft XP-style glowing particle burst
@@ -380,6 +564,9 @@ async function setStep(stepNum, direction = 'next') {
 
             // Force reflow to commit current height style before transition
             cardContainer.offsetHeight;
+
+            // Trigger step icon morphing transition
+            morphElement(currentStep, stepNum);
 
             // Start transitions
             cardContainer.style.height = `${targetHeight}px`;
