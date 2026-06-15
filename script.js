@@ -793,21 +793,13 @@ function startRulesTimer() {
 
     if (!timerFill || !acceptBtn) return;
 
-    // Reset read and active status and restore original rule icons
-    const icons = {
-        '1': '🚫',
-        '2': '💎',
-        '3': '🏠',
-        '4': '💬',
-        '5': '🤬'
-    };
+    // Reset read and active status and restore status badges
     document.querySelectorAll('.rule-item').forEach(item => {
         item.classList.remove('read');
         item.classList.remove('active');
-        const ruleIdx = item.getAttribute('data-rule');
-        const iconSpan = item.querySelector('.rule-icon');
-        if (iconSpan && icons[ruleIdx]) {
-            iconSpan.textContent = icons[ruleIdx];
+        const statusSpan = item.querySelector('.rule-status');
+        if (statusSpan) {
+            statusSpan.textContent = 'Potvrdit 🔲';
         }
     });
     
@@ -883,10 +875,10 @@ function setupRulesClicking() {
             const ruleIdx = parseInt(item.getAttribute('data-rule'));
             item.classList.add('read');
             
-            // Swap icon to checkmark
-            const iconSpan = item.querySelector('.rule-icon');
-            if (iconSpan) {
-                iconSpan.textContent = '✅';
+            // Swap status text to verified
+            const statusSpan = item.querySelector('.rule-status');
+            if (statusSpan) {
+                statusSpan.textContent = 'Potvrzeno ✅';
             }
             
             play8bitSound(`note-${ruleIdx}`);
@@ -1226,7 +1218,9 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
 
                 // Add classes for glow and shake
                 targetElement.classList.add('button-hit-shake');
-                targetElement.classList.add('btn-glow-active');
+                if (targetElement.classList.contains('btn')) {
+                    targetElement.classList.add('btn-glow-active');
+                }
                 
                 // Animate ripple scale and fade
                 requestAnimationFrame(() => {
@@ -1251,6 +1245,7 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
                 // Cleanup ripple and shake class after completion
                 setTimeout(() => {
                     targetElement.classList.remove('button-hit-shake');
+                    targetElement.classList.remove('btn-glow-active');
                     ripple.remove();
                 }, 800);
 
