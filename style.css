@@ -1224,35 +1224,195 @@ h2 {
     box-shadow: 0 4px 12px rgba(88, 101, 242, 0.15);
 }
 
-/* Responsive fixes */
-@media (max-width: 480px) {
+/* Responsive fixes & Mobile Optimizations */
+@media (max-width: 768px) {
     .app-container {
-        padding: 16px;
+        padding: 12px 14px;
+        gap: 16px;
     }
 
-    .card {
-        padding: 24px 16px;
+    /* Shrink visual footprint of the header */
+    .header {
+        padding: 8px 12px;
+        border-radius: 14px;
+        gap: 10px;
+    }
+
+    .logo-icon {
+        width: 24px;
+        height: 24px;
+        animation: none !important; /* Disable rotation to save mobile CPU/battery */
     }
 
     .logo-text h1 {
-        font-size: 16px;
+        font-size: 15px;
+    }
+
+    .logo-text .subtitle {
+        font-size: 9px;
+    }
+
+    .server-badge {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+
+    /* Card padding and height transition adjustment */
+    .card-container {
+        border-radius: 18px;
+        transition: height 0.4s ease;
+    }
+
+    .card-slider {
+        transition: transform 0.4s ease;
+    }
+
+    .card {
+        padding: 20px 14px;
+        transition: opacity 0.4s ease;
     }
 
     h2 {
-        font-size: 20px;
+        font-size: 19px;
+        margin-bottom: 8px;
     }
 
+    .card-desc {
+        font-size: 12.5px;
+        margin-bottom: 16px;
+    }
+
+    /* Step Icon sizes on mobile */
+    .step-icon, .success-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+        border-radius: 16px;
+        margin-bottom: 14px;
+        animation: none !important; /* Disable pulsing scale animations on mobile */
+    }
+
+    /* Discord name container on Step 2 */
+    .discord-user-info {
+        padding: 8px 12px;
+        border-radius: 12px;
+        max-width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .discord-avatar {
+        width: 30px;
+        height: 30px;
+    }
+
+    .discord-name {
+        font-size: 13px;
+    }
+
+    /* Nickname inputs and group */
+    .nick-input-group {
+        gap: 12px;
+        margin-bottom: 6px;
+    }
+
+    .mc-head-preview {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    .mc-head-placeholder {
+        font-size: 18px;
+    }
+
+    .input-wrapper input {
+        padding: 10px 0;
+        font-size: 14px;
+    }
+
+    /* Rules spacing adjustments */
     .rules-list {
-        padding: 14px;
+        padding: 10px;
+        gap: 8px;
     }
 
     .rule-item {
-        font-size: 12.5px;
+        padding: 10px 12px;
+        font-size: 12px;
+        border-radius: 10px;
     }
 
+    .rules-timer {
+        margin-top: 16px;
+        gap: 8px;
+    }
+
+    .timer-ring {
+        width: 44px;
+        height: 44px;
+    }
+
+    .timer-text {
+        font-size: 13px;
+    }
+
+    .timer-label {
+        font-size: 10px;
+    }
+
+    /* Tutorial layout */
     .tutorial-tabs {
         flex-direction: column;
         gap: 6px;
+    }
+
+    /* Hide heavy GPU-rendering radial gradients on mobile */
+    .card-glow {
+        display: none !important;
+    }
+}
+
+/* 🍎 iOS Safari / iPhone Specific Performance Optimizations */
+@supports (-webkit-touch-callout: none) {
+    /* Lower blur and shadow radius to boost WebKit composition performance */
+    .card-container {
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        background: rgba(10, 10, 10, 0.88) !important; /* Darken slightly to keep content readable without deep blur */
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .logo-icon {
+        filter: none !important; /* Remove expensive drop-shadow filters on icons */
+    }
+
+    .logo-text h1 .accent {
+        text-shadow: none !important; /* Remove text-shadow glow */
+    }
+
+    .step-icon {
+        box-shadow: none !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        text-shadow: none !important;
+    }
+
+    .verify-icon, .rules-icon {
+        text-shadow: none !important;
+    }
+
+    .success-icon {
+        box-shadow: none !important;
+        border: 1px solid var(--success-border) !important;
+    }
+
+    .success-icon.error {
+        box-shadow: none !important;
+    }
+
+    /* Reduce blur of fireflies/energy sparks on iOS Safari */
+    .flying-guide, .rules-firefly {
+        box-shadow: 0 0 8px 3px #ffb703, 0 0 3px 1px #fff !important;
     }
 }
 
