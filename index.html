@@ -121,36 +121,30 @@
                         <p class="nick-validation" id="nick-validation"></p>
                         <div class="source-select-group">
                             <label>Kde jsi se o našem Minecraft serveru dozvěděl? *</label>
-                            <div class="custom-select" id="custom-source-select">
-                                <button type="button" class="custom-select-trigger" id="source-trigger" onclick="toggleSourceDropdown()">
-                                    <span id="source-trigger-text">Vyber možnost...</span>
-                                    <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                                </button>
-                                <div class="custom-select-dropdown" id="source-dropdown">
-                                    <div class="source-option" data-value="youtube" onclick="selectSource(this)">
-                                        <span class="source-emoji">🎥</span>
-                                        <div class="source-text"><strong>YouTube</strong><small>Viděl jsem to na YouTube</small></div>
-                                    </div>
-                                    <div class="source-option" data-value="friend" onclick="selectSource(this)">
-                                        <span class="source-emoji">👥</span>
-                                        <div class="source-text"><strong>Od kamaráda</strong><small>Doporučil mi to kamarád</small></div>
-                                    </div>
-                                    <div class="source-option" data-value="discord" onclick="selectSource(this)">
-                                        <span class="source-emoji">💬</span>
-                                        <div class="source-text"><strong>Discord</strong><small>Našel jsem to na Discordu</small></div>
-                                    </div>
-                                    <div class="source-option" data-value="tiktok" onclick="selectSource(this)">
-                                        <span class="source-emoji">🎵</span>
-                                        <div class="source-text"><strong>TikTok</strong><small>Viděl jsem to na TikToku</small></div>
-                                    </div>
-                                    <div class="source-option" data-value="instagram" onclick="selectSource(this)">
-                                        <span class="source-emoji">📸</span>
-                                        <div class="source-text"><strong>Instagram</strong><small>Viděl jsem to na Instagramu</small></div>
-                                    </div>
-                                    <div class="source-option" data-value="other" onclick="selectSource(this)">
-                                        <span class="source-emoji">❓</span>
-                                        <div class="source-text"><strong>Jiné / Internet</strong><small>Jinde na internetu</small></div>
-                                    </div>
+                            <div class="source-grid" id="source-grid">
+                                <div class="source-tile" data-value="youtube" onclick="selectSourceTile(this)">
+                                    <span class="tile-emoji">🎥</span>
+                                    <span class="tile-label">YouTube</span>
+                                </div>
+                                <div class="source-tile" data-value="friend" onclick="selectSourceTile(this)">
+                                    <span class="tile-emoji">👥</span>
+                                    <span class="tile-label">Kamarád</span>
+                                </div>
+                                <div class="source-tile" data-value="discord" onclick="selectSourceTile(this)">
+                                    <span class="tile-emoji">💬</span>
+                                    <span class="tile-label">Discord</span>
+                                </div>
+                                <div class="source-tile" data-value="tiktok" onclick="selectSourceTile(this)">
+                                    <span class="tile-emoji">🎵</span>
+                                    <span class="tile-label">TikTok</span>
+                                </div>
+                                <div class="source-tile" data-value="instagram" onclick="selectSourceTile(this)">
+                                    <span class="tile-emoji">📸</span>
+                                    <span class="tile-label">Instagram</span>
+                                </div>
+                                <div class="source-tile" data-value="other" onclick="selectSourceTile(this)">
+                                    <span class="tile-emoji">❓</span>
+                                    <span class="tile-label">Jiné</span>
                                 </div>
                             </div>
                             <!-- Skryté pole pro kompatibilitu s původní JS logikou -->

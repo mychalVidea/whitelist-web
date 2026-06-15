@@ -648,40 +648,30 @@ function toggleSourceDropdown() {
     }
 }
 
-function selectSource(optionElement) {
-    const val = optionElement.getAttribute('data-value');
-    const emoji = optionElement.querySelector('.source-emoji').textContent;
-    const label = optionElement.querySelector('.source-text strong').textContent;
-
-    const triggerText = document.getElementById('source-trigger-text');
-    if (triggerText) {
-        triggerText.innerHTML = `<span class="source-emoji" style="font-size: 16px; margin-right: 8px;">${emoji}</span>${label}`;
-    }
-
+function selectSourceTile(tileElement) {
+    const val = tileElement.getAttribute('data-value');
+    
+    // Set value in the hidden input for compatibility
     const select = document.getElementById('mc-source-select');
     if (select) {
         select.value = val;
         select.dispatchEvent(new Event('change'));
     }
 
-    const dropdown = document.getElementById('custom-source-select');
-    if (dropdown) {
-        dropdown.querySelectorAll('.source-option').forEach(opt => {
-            opt.classList.remove('selected');
+    // Toggle selected class on tiles
+    const grid = document.getElementById('source-grid');
+    if (grid) {
+        grid.querySelectorAll('.source-tile').forEach(tile => {
+            tile.classList.remove('selected');
         });
-        optionElement.classList.add('selected');
-        dropdown.classList.add('selected');
-        dropdown.classList.remove('open');
+        tileElement.classList.add('selected');
+        play8bitSound('click');
+        
+        // Spawn small gold sparkles on selection
+        const rect = tileElement.getBoundingClientRect();
+        spawnSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
     }
 }
-
-// Close dropdown when clicking outside
-document.addEventListener('click', (event) => {
-    const dropdown = document.getElementById('custom-source-select');
-    if (dropdown && !dropdown.contains(event.target)) {
-        dropdown.classList.remove('open');
-    }
-});
 
 let selectedSource = '';
 
@@ -693,11 +683,18 @@ function setupInputListeners() {
     const placeholder = document.getElementById('mc-head-placeholder');
     const validation = document.getElementById('nick-validation');
     const submitBtn = document.getElementById('btn-submit-nick');
+    const sourceGroup = document.querySelector('.source-select-group');
 
     if (!input || !select) return;
 
+    // Reset visibility state on startup
+    if (sourceGroup) {
+        sourceGroup.classList.remove('visible');
+    }
+
     let debounceTimeout;
     let nickIsValid = false;
+    let revealTimeout = null;
 
     function checkFormState() {
         const sourceVal = select.value;
@@ -705,6 +702,23 @@ function setupInputListeners() {
             submitBtn.disabled = false;
         } else {
             submitBtn.disabled = true;
+        }
+
+        if (nickIsValid) {
+            if (sourceGroup && !sourceGroup.classList.contains('visible') && !revealTimeout) {
+                revealTimeout = setTimeout(() => {
+                    sourceGroup.classList.add('visible');
+                    revealTimeout = null;
+                }, 300); // smooth slide-out delay
+            }
+        } else {
+            if (revealTimeout) {
+                clearTimeout(revealTimeout);
+                revealTimeout = null;
+            }
+            if (sourceGroup) {
+                sourceGroup.classList.remove('visible');
+            }
         }
     }
 
