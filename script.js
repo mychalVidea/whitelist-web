@@ -939,11 +939,10 @@ function activateRule(index) {
         elapsed += intervalMs / 1000;
 
         const t = Math.min(elapsed / RULE_READ_TIME, 1);
-        // MrBeast ad-style progress curve where the speed (velocity) starts at 0,
-        // peaks early (around 12.5% of the duration), and then decays in a long tail.
-        // Mathematically, this is the integral of the rate curve: v(t) = c * t * (1 - t)^7
-        // Resulting in: p(t) = 1 + 8 * (1 - t)^9 - 9 * (1 - t)^8
-        const easedT = 1 + 8 * Math.pow(1 - t, 9) - 9 * Math.pow(1 - t, 8);
+        // MrBeast-style progress curve: shoots up fast to 80% in the first 1.5 seconds,
+        // and then visibly slows down, crawling the remaining 20% to reach 100% exactly at the end.
+        // This ensures the deceleration is clearly visible and does not freeze early.
+        const easedT = 1 - Math.pow(1 - t, 2.3);
         const percentage = easedT * 100;
 
         if (timerFill) {
