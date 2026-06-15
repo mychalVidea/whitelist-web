@@ -793,13 +793,21 @@ function startRulesTimer() {
 
     if (!timerFill || !acceptBtn) return;
 
-    // Reset read and active status and restore status badges
+    // Reset read and active status and restore original rule icons
+    const icons = {
+        '1': '🚫',
+        '2': '💎',
+        '3': '🏠',
+        '4': '💬',
+        '5': '🤬'
+    };
     document.querySelectorAll('.rule-item').forEach(item => {
         item.classList.remove('read');
         item.classList.remove('active');
-        const statusSpan = item.querySelector('.rule-status');
-        if (statusSpan) {
-            statusSpan.textContent = 'Potvrdit 🔲';
+        const ruleIdx = item.getAttribute('data-rule');
+        const iconSpan = item.querySelector('.rule-icon');
+        if (iconSpan && icons[ruleIdx]) {
+            iconSpan.textContent = icons[ruleIdx];
         }
     });
     
@@ -875,10 +883,10 @@ function setupRulesClicking() {
             const ruleIdx = parseInt(item.getAttribute('data-rule'));
             item.classList.add('read');
             
-            // Swap status text to verified
-            const statusSpan = item.querySelector('.rule-status');
-            if (statusSpan) {
-                statusSpan.textContent = 'Potvrzeno ✅';
+            // Swap icon to checkmark
+            const iconSpan = item.querySelector('.rule-icon');
+            if (iconSpan) {
+                iconSpan.textContent = '✅';
             }
             
             play8bitSound(`note-${ruleIdx}`);
