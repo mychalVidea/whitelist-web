@@ -939,10 +939,11 @@ function activateRule(index) {
         elapsed += intervalMs / 1000;
 
         const t = Math.min(elapsed / RULE_READ_TIME, 1);
-        // MrBeast-style progress curve: shoots up fast to 80% in the first 1.5 seconds,
-        // and then visibly slows down, crawling the remaining 20% to reach 100% exactly at the end.
-        // This ensures the deceleration is clearly visible and does not freeze early.
-        const easedT = 1 - Math.pow(1 - t, 2.3);
+        // MrBeast-style progress curve: shoots up fast to ~84% in the first 2 seconds,
+        // and then crawls the remaining 16% to reach 100% exactly at the end.
+        // We use a 1.7 exponent to leave a visible gap during the last second,
+        // compensating for the CSS 'stroke-linecap: round' which visually closes the circle early.
+        const easedT = 1 - Math.pow(1 - t, 1.7);
         const percentage = easedT * 100;
 
         if (timerFill) {
