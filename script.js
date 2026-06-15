@@ -69,57 +69,82 @@ function animateParticles() {
 animateParticles();
 
 // Confetti effect helper
+// Confetti effect helper - premium Minecraft XP-style glowing particle burst
 function triggerConfetti() {
     const confettiCanvas = document.getElementById('confetti');
     const confettiCtx = confettiCanvas.getContext('2d');
     confettiCanvas.width = window.innerWidth;
     confettiCanvas.height = window.innerHeight;
 
-    let colors = ['#ffb703', '#5865f2', '#10b981', '#ffffff', '#ff9f1c'];
-    let confettiArray = [];
+    const colors = ['#ffb703', '#ffc300', '#10b981', '#34d399', '#ffffff'];
+    const particles = [];
+    
+    // Position burst around the center of the screen/card
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight * 0.45;
 
-    class ConfettiPiece {
+    class XpParticle {
         constructor() {
-            this.x = Math.random() * confettiCanvas.width;
-            this.y = Math.random() * -confettiCanvas.height;
-            this.size = Math.random() * 8 + 6;
-            this.speedX = Math.random() * 4 - 2;
-            this.speedY = Math.random() * 5 + 4;
+            this.x = centerX;
+            this.y = centerY;
+            this.radius = Math.random() * 4 + 2; // diameter 4px to 12px
             this.color = colors[Math.floor(Math.random() * colors.length)];
-            this.rotation = Math.random() * 360;
-            this.rotationSpeed = Math.random() * 4 - 2;
+            
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 11 + 5;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed - Math.random() * 3; // slight upward bias
+            
+            this.opacity = 1;
+            this.fade = Math.random() * 0.015 + 0.01;
+            this.gravity = 0.14;
+            this.friction = 0.96;
         }
         update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            this.rotation += this.rotationSpeed;
+            this.vx *= this.friction;
+            this.vy *= this.friction;
+            this.vy += this.gravity;
+            
+            this.x += this.vx;
+            this.y += this.vy;
+            
+            this.opacity -= this.fade;
         }
         draw() {
-            confettiCtx.fillStyle = this.color;
             confettiCtx.save();
-            confettiCtx.translate(this.x, this.y);
-            confettiCtx.rotate((this.rotation * Math.PI) / 180);
-            confettiCtx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+            confettiCtx.globalAlpha = Math.max(this.opacity, 0);
+            
+            // Draw glowing circular particle
+            confettiCtx.shadowBlur = 10;
+            confettiCtx.shadowColor = this.color;
+            confettiCtx.fillStyle = this.color;
+            
+            confettiCtx.beginPath();
+            confettiCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            confettiCtx.fill();
+            
             confettiCtx.restore();
         }
     }
 
-    for (let i = 0; i < 150; i++) {
-        confettiArray.push(new ConfettiPiece());
+    for (let i = 0; i < 90; i++) {
+        particles.push(new XpParticle());
     }
 
     let animationId;
     function animate() {
         confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
         let active = false;
-        for (let i = 0; i < confettiArray.length; i++) {
-            const piece = confettiArray[i];
-            if (piece.y < confettiCanvas.height) {
-                piece.update();
-                piece.draw();
+        
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            if (p.opacity > 0) {
+                p.update();
+                p.draw();
                 active = true;
             }
         }
+        
         if (active) {
             animationId = requestAnimationFrame(animate);
         } else {
@@ -668,19 +693,11 @@ function setupInputListeners() {
     const placeholder = document.getElementById('mc-head-placeholder');
     const validation = document.getElementById('nick-validation');
     const submitBtn = document.getElementById('btn-submit-nick');
-    const sourceGroup = document.querySelector('.source-select-group');
 
     if (!input || !select) return;
 
-    // Reset visibility states on setup
-    if (sourceGroup) {
-        sourceGroup.classList.remove('dropdown-ready');
-        sourceGroup.classList.remove('visible');
-    }
-
     let debounceTimeout;
     let nickIsValid = false;
-    let revealTimeout = null;
 
     function checkFormState() {
         const sourceVal = select.value;
@@ -688,29 +705,6 @@ function setupInputListeners() {
             submitBtn.disabled = false;
         } else {
             submitBtn.disabled = true;
-        }
-
-        if (nickIsValid) {
-            if (sourceGroup && !sourceGroup.classList.contains('visible') && !revealTimeout) {
-                revealTimeout = setTimeout(() => {
-                    sourceGroup.classList.add('visible');
-                    setTimeout(() => {
-                        if (sourceGroup && sourceGroup.classList.contains('visible')) {
-                            sourceGroup.classList.add('dropdown-ready');
-                        }
-                    }, 500); // Wait for transition max-height to complete
-                    revealTimeout = null;
-                }, 1000); // 1 second delay after nick becomes valid
-            }
-        } else {
-            if (revealTimeout) {
-                clearTimeout(revealTimeout);
-                revealTimeout = null;
-            }
-            if (sourceGroup) {
-                sourceGroup.classList.remove('dropdown-ready');
-                sourceGroup.classList.remove('visible');
-            }
         }
     }
 
@@ -1303,7 +1297,9 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
                 // Cleanup ripple and shake class after completion
                 setTimeout(() => {
                     targetElement.classList.remove('button-hit-shake');
-                    targetElement.classList.remove('btn-glow-active');
+                    if (targetElement.id !== 'btn-learn-more') {
+                        targetElement.classList.remove('btn-glow-active');
+                    }
                     ripple.remove();
                 }, 800);
 
@@ -1554,6 +1550,8 @@ function toggleTutorial() {
     const container = document.getElementById('tutorial-container');
     const btn = document.getElementById('btn-learn-more');
     if (!container || !btn) return;
+
+    btn.classList.remove('btn-glow-active');
 
     const cardContainer = document.querySelector('.card-container');
     const currentHeight = cardContainer.offsetHeight;
