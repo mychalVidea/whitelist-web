@@ -78,7 +78,7 @@ function triggerConfetti() {
 
     const colors = ['#ffb703', '#ffc300', '#10b981', '#34d399', '#ffffff'];
     const particles = [];
-    
+
     // Position burst around the center of the screen/card
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight * 0.45;
@@ -89,12 +89,12 @@ function triggerConfetti() {
             this.y = centerY;
             this.radius = Math.random() * 4 + 2; // diameter 4px to 12px
             this.color = colors[Math.floor(Math.random() * colors.length)];
-            
+
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 11 + 5;
             this.vx = Math.cos(angle) * speed;
             this.vy = Math.sin(angle) * speed - Math.random() * 3; // slight upward bias
-            
+
             this.opacity = 1;
             this.fade = Math.random() * 0.015 + 0.01;
             this.gravity = 0.14;
@@ -104,25 +104,25 @@ function triggerConfetti() {
             this.vx *= this.friction;
             this.vy *= this.friction;
             this.vy += this.gravity;
-            
+
             this.x += this.vx;
             this.y += this.vy;
-            
+
             this.opacity -= this.fade;
         }
         draw() {
             confettiCtx.save();
             confettiCtx.globalAlpha = Math.max(this.opacity, 0);
-            
+
             // Draw glowing circular particle
             confettiCtx.shadowBlur = 10;
             confettiCtx.shadowColor = this.color;
             confettiCtx.fillStyle = this.color;
-            
+
             confettiCtx.beginPath();
             confettiCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             confettiCtx.fill();
-            
+
             confettiCtx.restore();
         }
     }
@@ -135,7 +135,7 @@ function triggerConfetti() {
     function animate() {
         confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
         let active = false;
-        
+
         for (let i = 0; i < particles.length; i++) {
             const p = particles[i];
             if (p.opacity > 0) {
@@ -144,7 +144,7 @@ function triggerConfetti() {
                 active = true;
             }
         }
-        
+
         if (active) {
             animationId = requestAnimationFrame(animate);
         } else {
@@ -166,66 +166,66 @@ function play8bitSound(type) {
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
-        
+
         const now = audioCtx.currentTime;
-        
+
         if (type === 'click') {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(400, now);
             osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
-            
+
             gain.gain.setValueAtTime(0.2, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-            
+
             osc.start(now);
             osc.stop(now + 0.08);
-        } 
+        }
         else if (type === 'error') {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(180, now);
             osc.frequency.setValueAtTime(120, now + 0.25);
-            
+
             gain.gain.setValueAtTime(0.15, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-            
+
             osc.start(now);
             osc.stop(now + 0.25);
-        } 
+        }
         else if (type === 'levelup') {
             // Sequence of 2 high-pitch chimes (G6 and C7) matching Minecraft XP ding
             const chime1 = audioCtx.createOscillator();
             const gain1 = audioCtx.createGain();
             chime1.connect(gain1);
             gain1.connect(audioCtx.destination);
-            
+
             chime1.type = 'sine';
             chime1.frequency.setValueAtTime(1567.98, now); // G6
             gain1.gain.setValueAtTime(0.15, now);
             gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-            
+
             chime1.start(now);
             chime1.stop(now + 0.35);
-            
+
             const chime2 = audioCtx.createOscillator();
             const gain2 = audioCtx.createGain();
             chime2.connect(gain2);
             gain2.connect(audioCtx.destination);
-            
+
             chime2.type = 'sine';
             chime2.frequency.setValueAtTime(2093.00, now + 0.08); // C7
             gain2.gain.setValueAtTime(0.18, now + 0.08);
             gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-            
+
             chime2.start(now + 0.08);
             chime2.stop(now + 0.45);
         }
@@ -238,13 +238,13 @@ function play8bitSound(type) {
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, now);
-            
+
             gain.gain.setValueAtTime(0.18, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-            
+
             osc.start(now);
             osc.stop(now + 0.35);
         }
@@ -256,23 +256,23 @@ function play8bitSound(type) {
             for (let i = 0; i < bufferSize; i++) {
                 data[i] = Math.random() * 2 - 1;
             }
-            
+
             const noise = audioCtx.createBufferSource();
             noise.buffer = buffer;
-            
+
             const filter = audioCtx.createBiquadFilter();
             filter.type = 'lowpass';
             filter.frequency.value = 600; // block break style thud
-            
+
             const gain = audioCtx.createGain();
-            
+
             noise.connect(filter);
             filter.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             gain.gain.setValueAtTime(0.18, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-            
+
             noise.start(now);
             noise.stop(now + 0.15);
         }
@@ -281,14 +281,14 @@ function play8bitSound(type) {
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(550, now);
             osc.frequency.setValueAtTime(700, now + 0.02);
-            
+
             gain.gain.setValueAtTime(0.04, now); // quiet interface feedback tick
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-            
+
             osc.start(now);
             osc.stop(now + 0.05);
         }
@@ -306,21 +306,21 @@ async function setStep(stepNum, direction = 'next') {
 
     const cards = Array.from(cardSlider.querySelectorAll('.card'));
     const activeCard = cardSlider.querySelector('.card.active') || cards[0];
-    
+
     let targetCard;
     if (stepNum === 'error') {
         targetCard = document.getElementById('step-error');
     } else {
         targetCard = document.getElementById(`step-${stepNum}`);
     }
-    
+
     if (!targetCard) return;
-    
+
     const targetIndex = cards.indexOf(targetCard);
     if (targetIndex === -1) return;
-    
+
     currentStep = stepNum;
-    
+
     if (transitionTimeout) {
         clearTimeout(transitionTimeout);
         transitionTimeout = null;
@@ -331,7 +331,7 @@ async function setStep(stepNum, direction = 'next') {
         cardContainer.style.transition = 'none';
         cardSlider.style.transition = 'none';
         cards.forEach(c => c.style.transition = 'none');
-        
+
         cards.forEach(c => {
             c.classList.remove('active');
             if (c !== targetCard) {
@@ -341,16 +341,16 @@ async function setStep(stepNum, direction = 'next') {
             }
         });
         targetCard.classList.add('active');
-        
+
         cardSlider.style.transform = `translateX(-${targetIndex * 100}%)`;
-        
+
         // Measure and set container height instantly
         const targetHeight = targetCard.offsetHeight;
         cardContainer.style.height = `${targetHeight}px`;
-        
+
         // Force reflow
         cardContainer.offsetHeight;
-        
+
         // Re-enable transitions on next tick
         setTimeout(() => {
             cardContainer.style.transition = '';
@@ -359,35 +359,35 @@ async function setStep(stepNum, direction = 'next') {
             cardContainer.style.height = 'auto';
             cardContainer.style.overflow = 'visible';
         }, 50);
-        
+
         initialLoad = false;
     } else {
         if (activeCard && activeCard !== targetCard) {
             play8bitSound('click');
-            
+
             // Smoothly autoscroll the card container into the viewport center
             cardContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
+
             // Temporarily expand the target card to measure its natural content height
             targetCard.classList.remove('collapsed');
-            
+
             const currentHeight = activeCard.offsetHeight;
             const targetHeight = targetCard.offsetHeight;
-            
+
             // Set overflow to hidden and fix height to current card height to start transition
             cardContainer.style.overflow = 'hidden';
             cardContainer.style.height = `${currentHeight}px`;
-            
+
             // Force reflow to commit current height style before transition
             cardContainer.offsetHeight;
-            
+
             // Start transitions
             cardContainer.style.height = `${targetHeight}px`;
             cardSlider.style.transform = `translateX(-${targetIndex * 100}%)`;
-            
+
             cards.forEach(c => c.classList.remove('active'));
             targetCard.classList.add('active');
-            
+
             // Wait for 600ms transition to complete
             transitionTimeout = setTimeout(() => {
                 // Collapse all inactive cards so they don't stretch the flexbox container height
@@ -396,7 +396,7 @@ async function setStep(stepNum, direction = 'next') {
                         c.classList.add('collapsed');
                     }
                 });
-                
+
                 cardContainer.style.height = 'auto';
                 cardContainer.style.overflow = 'visible';
                 transitionTimeout = null;
@@ -466,7 +466,7 @@ function goBackToNickDirectly() {
     const prevError = document.getElementById('inline-verify-error');
     if (prevError) prevError.remove();
     document.getElementById('verify-error-actions').style.display = 'none';
-    
+
     setStep(2, 'prev');
 }
 
@@ -474,11 +474,11 @@ function goBackToNickDirectly() {
 function showMinecraftToast(title, description, icon = '🏆') {
     const existing = document.getElementById('mc-achievement-toast');
     if (existing) existing.remove();
-    
+
     const toast = document.createElement('div');
     toast.id = 'mc-achievement-toast';
     toast.className = 'minecraft-toast';
-    
+
     toast.innerHTML = `
         <div class="toast-icon-container">${icon}</div>
         <div class="toast-text">
@@ -486,14 +486,14 @@ function showMinecraftToast(title, description, icon = '🏆') {
             <span class="toast-desc">${description}</span>
         </div>
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.classList.add('show');
         play8bitSound('levelup');
     }, 300);
-    
+
     setTimeout(() => {
         toast.classList.add('toast-out');
         setTimeout(() => toast.remove(), 600);
@@ -507,30 +507,30 @@ function setupBlockBreakParticles() {
         if (!e.target.closest('button') && !e.target.closest('.copyable') && !e.target.closest('.source-option') && !e.target.closest('.tab-btn')) {
             return;
         }
-        
+
         const particleCount = 14 + Math.floor(Math.random() * 8);
         const colors = ['#553c23', '#866043', '#3c2d1e', '#ffb703', '#5865f2'];
-        
+
         for (let i = 0; i < particleCount; i++) {
             const p = document.createElement('div');
             p.className = 'block-particle';
-            
+
             p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             p.style.left = `${e.clientX}px`;
             p.style.top = `${e.clientY}px`;
-            
+
             document.body.appendChild(p);
-            
+
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 100 + 30;
             const targetX = Math.cos(angle) * speed;
             const targetY = Math.sin(angle) * speed + (Math.random() * 30 + 15);
-            
+
             setTimeout(() => {
                 p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
                 p.style.opacity = '0';
             }, 10);
-            
+
             setTimeout(() => p.remove(), 600);
         }
     });
@@ -544,7 +544,7 @@ async function startDiscordLogin() {
 
         const res = await fetch(`${API_BASE_URL}/api/whitelist/discord-url`);
         const data = await res.json();
-        
+
         if (data.success && data.url) {
             window.location.href = data.url;
         } else {
@@ -650,7 +650,7 @@ function toggleSourceDropdown() {
 
 function selectSourceTile(tileElement) {
     const val = tileElement.getAttribute('data-value');
-    
+
     // Set value in the hidden input for compatibility
     const select = document.getElementById('mc-source-select');
     if (select) {
@@ -666,7 +666,7 @@ function selectSourceTile(tileElement) {
         });
         tileElement.classList.add('selected');
         play8bitSound('click');
-        
+
         // Spawn small gold sparkles on selection
         const rect = tileElement.getBoundingClientRect();
         spawnSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
@@ -754,13 +754,36 @@ function setupInputListeners() {
         validation.textContent = '⏳ Kontroluji nick...';
         validation.className = 'nick-validation';
 
-        debounceTimeout = setTimeout(() => {
+        debounceTimeout = setTimeout(async () => {
+            // First check if nick is whitelisted in DB or whitelist.json
+            try {
+                const checkRes = await fetch(`${API_BASE_URL}/api/whitelist/check-nick?nick=${val}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                const checkData = await checkRes.json();
+
+                if (checkData.success && !checkData.available) {
+                    previewImg.style.display = 'none';
+                    placeholder.style.display = 'block';
+                    placeholder.textContent = '❌';
+                    validation.textContent = `❌ ${checkData.message}`;
+                    validation.className = 'nick-validation error';
+                    nickIsValid = false;
+                    checkFormState();
+                    return;
+                }
+            } catch (err) {
+                console.warn('[WHITELIST] Availability check failed:', err);
+            }
+
             // Update head preview
             previewImg.src = `https://mc-heads.net/avatar/${val}/100`;
             previewImg.onload = () => {
                 previewImg.style.display = 'block';
                 placeholder.style.display = 'none';
-                validation.textContent = '✅ Správný formát nicku';
+                validation.textContent = '✅ Nick je volný a připravený';
                 validation.className = 'nick-validation valid';
                 nickIsValid = true;
                 checkFormState();
@@ -769,7 +792,7 @@ function setupInputListeners() {
                 previewImg.style.display = 'none';
                 placeholder.style.display = 'block';
                 placeholder.textContent = '?';
-                validation.textContent = '❌ Selhalo načtení skinu z Mojangu';
+                validation.textContent = '❌ Selhalo načtení skinu';
                 validation.className = 'nick-validation error';
                 nickIsValid = true; // still allow submission if Mojang is down
                 checkFormState();
@@ -787,7 +810,7 @@ function submitNick() {
     selectedSource = select.value;
     setStep(3, 'next');
     startRulesTimer();
-    
+
     showMinecraftToast('Dosažen pokrok!', 'Přezdívka nastavena!', '🎮');
 }
 
@@ -829,13 +852,13 @@ function startRulesTimer() {
             iconSpan.textContent = icons[ruleIdx];
         }
     });
-    
+
     acceptBtn.disabled = true;
     if (lockIcon) lockIcon.style.display = 'inline-block';
-    
+
     const rulesTimer = document.getElementById('rules-timer');
     if (rulesTimer) rulesTimer.style.opacity = '1';
-    
+
     activeRuleIndex = 0;
     activateRule(activeRuleIndex);
 }
@@ -856,13 +879,13 @@ function activateRule(index) {
         const lockIcon = document.getElementById('btn-lock');
         if (acceptBtn) acceptBtn.disabled = false;
         if (lockIcon) lockIcon.style.display = 'none';
-        
+
         const timerLabel = document.querySelector('.timer-label');
         if (timerLabel) timerLabel.textContent = 'Pravidla přečtena! 🎉';
-        
+
         const rulesTimer = document.getElementById('rules-timer');
         if (rulesTimer) rulesTimer.style.opacity = '0.3';
-        
+
         const timerFill = document.getElementById('timer-fill');
         if (timerFill) timerFill.setAttribute('stroke-dasharray', '100, 100');
         const timerText = document.getElementById('timer-text');
@@ -871,7 +894,7 @@ function activateRule(index) {
         play8bitSound('levelup');
         triggerConfetti();
         showMinecraftToast('Výzva splněna!', 'Pravidla přečtena! 📜', '📜');
-        
+
         const firefly = document.getElementById('rules-firefly');
         if (firefly) firefly.style.opacity = '0';
         return;
@@ -904,7 +927,7 @@ function activateRule(index) {
 
     let elapsed = 0;
     const intervalMs = 100; // update every 100ms for smooth progress
-    
+
     if (timerText) {
         timerText.textContent = RULE_READ_TIME;
     }
@@ -914,7 +937,7 @@ function activateRule(index) {
 
     rulesTimerInterval = setInterval(() => {
         elapsed += intervalMs / 1000;
-        
+
         const percentage = Math.min((elapsed / RULE_READ_TIME) * 100, 100);
         if (timerFill) {
             timerFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
@@ -936,9 +959,9 @@ function activateRule(index) {
                 currentItem.classList.add('read');
                 const iconSpan = currentItem.querySelector('.rule-icon');
                 if (iconSpan) iconSpan.textContent = '✅';
-                
+
                 play8bitSound(`note-${index + 1}`);
-                
+
                 // Spawn sparkles on this rule
                 const rect = currentItem.getBoundingClientRect();
                 spawnEpicSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
@@ -955,13 +978,13 @@ function activateRule(index) {
 function updateRulesFirefly() {
     const firefly = document.getElementById('rules-firefly');
     const activeItem = document.querySelector('.rule-item.active');
-    
+
     if (activeItem && firefly) {
         const rect = activeItem.getBoundingClientRect();
         const containerRect = activeItem.parentElement.getBoundingClientRect();
         const topPos = rect.top - containerRect.top + rect.height / 2 - 3;
         const leftPos = rect.left - containerRect.left - 15;
-        
+
         firefly.style.opacity = '1';
         firefly.style.top = `${topPos}px`;
         firefly.style.left = `${leftPos}px`;
@@ -988,22 +1011,22 @@ function spawnEpicSparkles(x, y) {
         p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         p.style.left = `${x}px`;
         p.style.top = `${y}px`;
-        
+
         p.style.width = '6px';
         p.style.height = '6px';
-        
+
         document.body.appendChild(p);
-        
+
         const angle = (i / particleCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
         const speed = Math.random() * 110 + 60;
         const targetX = Math.cos(angle) * speed;
         const targetY = Math.sin(angle) * speed;
-        
+
         setTimeout(() => {
             p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
             p.style.opacity = '0';
         }, 10);
-        
+
         setTimeout(() => p.remove(), 600);
     }
 }
@@ -1012,7 +1035,7 @@ function spawnEpicSparkles(x, y) {
 function acceptRules() {
     setStep(4, 'next');
     runVerificationSteps();
-    
+
     showMinecraftToast('Dosažen pokrok!', 'Pravidla přijata!', '📜');
 }
 
@@ -1023,7 +1046,7 @@ async function runVerificationSteps() {
     const prevError = document.getElementById('inline-verify-error');
     if (prevError) prevError.remove();
     document.getElementById('verify-error-actions').style.display = 'none';
-    
+
     // Reset classes
     document.querySelectorAll('.verify-step').forEach(step => {
         step.className = 'verify-step';
@@ -1059,7 +1082,7 @@ async function runVerificationSteps() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${sessionToken}`
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 minecraftNick: selectedNick,
                 discoverySource: selectedSource
             })
@@ -1071,7 +1094,7 @@ async function runVerificationSteps() {
             vs3.classList.remove('current');
             vs3.classList.add('failed');
             vs3.querySelector('.verify-status').textContent = '❌';
-            
+
             // Add detailed message inline
             const errLabel = document.createElement('div');
             errLabel.id = 'inline-verify-error';
@@ -1145,7 +1168,7 @@ function copyToClipboard(text, element) {
     navigator.clipboard.writeText(text).then(() => {
         play8bitSound('levelup');
         triggerConfetti(); // Super epic!
-        
+
         // Add copied class to trigger green highlight bounce
         element.classList.add('copied');
         element.classList.remove('guide-pulse'); // Remove guide pulse once copied
@@ -1166,7 +1189,7 @@ function copyToClipboard(text, element) {
         const tooltip = document.createElement('div');
         tooltip.className = 'copy-tooltip';
         tooltip.textContent = 'IP Zkopírována! 📋';
-        
+
         // Position fixed coordinates relative to viewport
         tooltip.style.left = `${rect.left + rect.width / 2}px`;
         tooltip.style.top = `${rect.top - 18}px`;
@@ -1230,7 +1253,7 @@ function showSuccessState(alreadyExists = false, nick = '') {
         triggerConfetti();
         showMinecraftToast('Výzva splněna!', 'Přidán na whitelist!');
     }
-    
+
     // Trigger flying guide targeting the IP address first!
     setTimeout(() => {
         triggerFlyingGuide('server-ip', 'Zkopíruj IP! 📡', 40, () => {
@@ -1272,7 +1295,7 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
             if (progress >= 1) {
                 // Collision!
                 firefly.remove();
-                
+
                 // Create ripple element inside targetElement
                 const ripple = document.createElement('div');
                 ripple.className = 'btn-ripple';
@@ -1287,7 +1310,7 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
                 if (targetElement.classList.contains('btn')) {
                     targetElement.classList.add('btn-glow-active');
                 }
-                
+
                 // Animate ripple scale and fade
                 requestAnimationFrame(() => {
                     ripple.style.transform = 'translate(-50%, -50%) scale(2.8)';
@@ -1307,7 +1330,7 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
 
                 // Spawn sparkles
                 spawnSparkles(targetX, targetY);
-                
+
                 // Cleanup ripple and shake class after completion
                 setTimeout(() => {
                     targetElement.classList.remove('button-hit-shake');
@@ -1324,7 +1347,7 @@ function triggerFlyingGuide(targetId, bubbleText, bubbleOffset = 50, callback = 
             // Clumsy wobbly trajectory + loop-de-loop!
             const baseX = startX + (targetX - startX) * progress;
             const baseY = startY + (targetY - startY) * progress;
-            
+
             // 1. Clumsy sine wobble
             const wobble = Math.sin(progress * Math.PI * 5) * 25;
             let x = baseX;
@@ -1430,10 +1453,10 @@ function flyEnergyParticle(startX, startY, targetElement) {
             // Light up target element
             targetElement.classList.remove('energy-target-dimmed');
             targetElement.classList.add('gold-flash');
-            
+
             // Spawn gold sparkles explosion
             spawnSparkles(curTargetX, curTargetY);
-            
+
             // Trigger 8-bit XP/click chime sound
             play8bitSound('click');
 
@@ -1520,10 +1543,10 @@ function flyEnergyParticleReverse(startX, startY, targetButton) {
             // Highlight target button and make it gold
             targetButton.classList.add('gold-flash');
             targetButton.classList.add('btn-glow-active');
-            
+
             // Spawn gold sparkles explosion on target button
             spawnSparkles(curTargetX, curTargetY);
-            
+
             // Trigger 8-bit click chime
             play8bitSound('click');
 
@@ -1552,10 +1575,10 @@ function triggerTutorialEnergyReverse(targetButton, containerSelector) {
         const rect = source.getBoundingClientRect();
         const startX = rect.left + rect.width / 2;
         const startY = rect.top + rect.height / 2;
-        
+
         setTimeout(() => {
             flyEnergyParticleReverse(startX, startY, targetButton);
-            
+
             // Remove dimmed and gold flash styles from tutorial elements
             source.classList.remove('energy-target-dimmed');
             source.classList.remove('gold-flash');
@@ -1572,7 +1595,7 @@ function showError(message) {
     // Show error card
     const errorDesc = document.getElementById('error-desc');
     if (errorDesc) errorDesc.textContent = message;
-    
+
     setStep('error', 'next');
 }
 
@@ -1583,12 +1606,12 @@ function showDiscordInviteError(inviteUrl) {
 
     const errorTitle = document.getElementById('error-title');
     const errorDesc = document.getElementById('error-desc');
-    
+
     if (errorTitle) errorTitle.textContent = 'Nejsi na našem Discordu!';
     if (errorDesc) {
         errorDesc.innerHTML = 'Pro zápis na whitelist musíš být členem našeho Discord serveru.<br>Připoj se pomocí tlačítka níže a poté to zkus znovu!';
     }
-    
+
     const existingInviteBtn = document.getElementById('btn-error-invite');
     if (existingInviteBtn) existingInviteBtn.remove();
 
@@ -1623,14 +1646,14 @@ function resetApp() {
 
     const existingInviteBtn = document.getElementById('btn-error-invite');
     if (existingInviteBtn) existingInviteBtn.remove();
-    
+
     const errorTitle = document.getElementById('error-title');
     if (errorTitle) errorTitle.textContent = 'Něco se nepovedlo';
 
     // Reset progress container display
     const progressContainer = document.getElementById('progress-container');
     if (progressContainer) progressContainer.style.display = '';
-    
+
     // Reset spinners
     document.querySelectorAll('.verify-step').forEach(step => {
         step.className = 'verify-step';
@@ -1670,9 +1693,9 @@ function toggleTutorial() {
         container.classList.remove('closing');
         container.style.display = 'block';
         btn.textContent = 'Skrýt návod 📖';
-        
+
         play8bitSound('click');
-        
+
         // Wait 350ms so particles fly while unfolding and hit right as it completes
         setTimeout(() => {
             triggerTutorialEnergy(btn, '#pane-claim');
@@ -1695,13 +1718,13 @@ function toggleTutorial() {
         // CLOSING
         container.classList.add('closing');
         btn.textContent = 'Dozvědět se více (Jak hrát?) 📖';
-        
+
         play8bitSound('poof');
         spawnSmokePoof(container);
-        
+
         // Trigger particles flying BACK to the button!
         triggerTutorialEnergyReverse(btn, '#tutorial-container');
-        
+
         // Measure targeted shrink height by temporarily hiding display
         container.style.display = 'none';
         const targetHeight = cardContainer.offsetHeight;
@@ -1726,30 +1749,30 @@ function toggleTutorial() {
 function spawnSmokePoof(element) {
     const rect = element.getBoundingClientRect();
     const particleCount = 18 + Math.floor(Math.random() * 8);
-    
+
     for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.className = 'smoke-particle';
-        
+
         const size = Math.random() * 6 + 6;
         p.style.width = `${size}px`;
         p.style.height = `${size}px`;
-        
+
         const x = rect.left + Math.random() * rect.width;
         const y = rect.bottom - 12;
         p.style.left = `${x}px`;
         p.style.top = `${y}px`;
-        
+
         document.body.appendChild(p);
-        
+
         const targetX = (Math.random() - 0.5) * 80;
         const targetY = -35 - Math.random() * 45;
-        
+
         setTimeout(() => {
             p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.2)`;
             p.style.opacity = '0';
         }, 10);
-        
+
         setTimeout(() => p.remove(), 700);
     }
 }
@@ -1825,7 +1848,7 @@ async function resetWhitelistedNick() {
         });
 
         const data = await res.json();
-        
+
         if (data.success) {
             // Reset input values
             const nickInput = document.getElementById('mc-nick-input');
@@ -1833,19 +1856,19 @@ async function resetWhitelistedNick() {
                 nickInput.value = '';
                 nickInput.dispatchEvent(new Event('input'));
             }
-            
+
             // Clear source dropdown selection
             const sourceSelect = document.getElementById('mc-source-select');
             if (sourceSelect) {
                 sourceSelect.value = '';
                 sourceSelect.dispatchEvent(new Event('change'));
             }
-            
+
             const triggerText = document.getElementById('source-trigger-text');
             if (triggerText) {
                 triggerText.textContent = 'Vyber možnost...';
             }
-            
+
             const dropdown = document.getElementById('custom-source-select');
             if (dropdown) {
                 dropdown.classList.remove('selected');
@@ -1866,7 +1889,7 @@ async function resetWhitelistedNick() {
 
             // Go back to Step 2
             await setStep(2, 'prev');
-            
+
             showMinecraftToast('Whitelist resetován', 'Můžeš zadat nový nick!', '🔄');
         } else {
             throw new Error(data.message || 'Nepodařilo se resetovat whitelist.');
