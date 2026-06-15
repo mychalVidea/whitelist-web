@@ -780,7 +780,7 @@ function submitNick() {
 // State variables for automatic rules progression
 let rulesTimerInterval = null;
 let activeRuleIndex = 0;
-const RULE_READ_TIME = 4; // seconds per rule
+const RULE_READ_TIME = 3; // seconds per rule
 
 // Automated rules sequence and progress indicator
 function startRulesTimer() {
@@ -1459,6 +1459,96 @@ function triggerTutorialEnergy(sourceElement, containerSelector) {
     });
 }
 
+// Sparkle XP fireflies flying from tutorial elements back to the Learn More button
+function flyEnergyParticleReverse(startX, startY, targetButton) {
+    const particle = document.createElement('div');
+    particle.className = 'energy-particle';
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    document.body.appendChild(particle);
+
+    const startTime = performance.now();
+    const duration = 280 + Math.random() * 120; // 0.28s to 0.40s flight time
+
+    // Arc path offsets to targetButton
+    const rect = targetButton.getBoundingClientRect();
+    const targetX = rect.left + rect.width / 2;
+    const targetY = rect.top + rect.height / 2;
+
+    const midX = (startX + targetX) / 2;
+    const midY = (startY + targetY) / 2;
+    const offsetX = (Math.random() - 0.5) * 120;
+    const offsetY = -60 - Math.random() * 80;
+    const cpX = midX + offsetX;
+    const cpY = midY + offsetY;
+
+    function animate(time) {
+        const elapsed = time - startTime;
+        const t = Math.min(elapsed / duration, 1);
+
+        // Dynamically compute target in case of scrolling
+        const currentRect = targetButton.getBoundingClientRect();
+        const curTargetX = currentRect.left + currentRect.width / 2;
+        const curTargetY = currentRect.top + currentRect.height / 2;
+
+        // Quadratic Bezier interpolation
+        const x = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * cpX + t * t * curTargetX;
+        const y = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * cpY + t * t * curTargetY;
+
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+
+        if (t < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            particle.remove();
+
+            // Highlight target button and make it gold
+            targetButton.classList.add('gold-flash');
+            targetButton.classList.add('btn-glow-active');
+            
+            // Spawn gold sparkles explosion on target button
+            spawnSparkles(curTargetX, curTargetY);
+            
+            // Trigger 8-bit click chime
+            play8bitSound('click');
+
+            setTimeout(() => {
+                targetButton.classList.remove('gold-flash');
+            }, 800);
+        }
+    }
+    requestAnimationFrame(animate);
+}
+
+// Spreads energy particles from elements back to Learn More button
+function triggerTutorialEnergyReverse(targetButton, containerSelector) {
+    if (!targetButton) return;
+
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+
+    // Find all targets in the active tutorial pane
+    const activePane = container.querySelector('.tab-pane.active') || container;
+    const sources = Array.from(activePane.querySelectorAll('.step-num, strong, .btn-map-link'));
+    if (sources.length === 0) return;
+
+    // Fire flying fireflies sequentially back to the button
+    sources.forEach((source, index) => {
+        const rect = source.getBoundingClientRect();
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top + rect.height / 2;
+        
+        setTimeout(() => {
+            flyEnergyParticleReverse(startX, startY, targetButton);
+            
+            // Remove dimmed and gold flash styles from tutorial elements
+            source.classList.remove('energy-target-dimmed');
+            source.classList.remove('gold-flash');
+        }, index * 30);
+    });
+}
+
 // Show error panel view
 function showError(message) {
     // Hide progress bar container
@@ -1594,6 +1684,9 @@ function toggleTutorial() {
         
         play8bitSound('poof');
         spawnSmokePoof(container);
+        
+        // Trigger particles flying BACK to the button!
+        triggerTutorialEnergyReverse(btn, '#tutorial-container');
         
         // Measure targeted shrink height by temporarily hiding display
         container.style.display = 'none';
