@@ -833,21 +833,40 @@ h2 {
 }
 
 .rule-item {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-left: 3px solid transparent;
+}
+
+.rule-item:not(.read):hover {
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(3px);
 }
 
 .rule-item.active {
-    background: rgba(255, 183, 3, 0.08);
-    transform: translateX(5px);
-    border-left: 3px solid var(--accent);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 183, 3, 0.08) !important;
+    transform: translateX(6px) !important;
+    border-left: 3px solid var(--accent) !important;
+    box-shadow: 0 0 15px rgba(255, 183, 3, 0.2) !important;
 }
 
 .rule-item.active span {
-    color: #fff;
-    font-weight: 600;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+.rule-item.read {
+    background: rgba(16, 185, 129, 0.06) !important;
+    border-left: 3px solid var(--success-color) !important;
+    opacity: 0.75;
+    transform: translateX(0) !important;
+    box-shadow: none !important;
+}
+
+.rule-item.read span {
+    color: rgba(255, 255, 255, 0.5) !important;
+    text-decoration: line-through;
 }
 
 /* Card Transitions */
@@ -1674,30 +1693,45 @@ h2 {
 
 /* 🏷️ Server Version Highlight */
 .version-highlight {
-    background: rgba(16, 185, 129, 0.08) !important;
-    color: var(--success-color) !important;
-    border: 1px solid rgba(16, 185, 129, 0.25) !important;
-    padding: 4px 10px !important;
-    border-radius: 6px !important;
-    font-size: 12.5px !important;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+    border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+    padding: 5px 12px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
     display: inline-block !important;
+    font-weight: 800 !important;
+    text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+    animation: versionHighlightPulse 1.5s ease-in-out infinite alternate !important;
+}
+
+@keyframes versionHighlightPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+    }
+    100% {
+        transform: scale(1.06);
+        box-shadow: 0 0 22px rgba(16, 185, 129, 0.65);
+    }
 }
 
 /* 📋 IP Copy Feedback Tooltip */
 .copy-tooltip {
     position: fixed;
     transform: translate(-50%, -50%) scale(0.9);
-    background: #10b981;
+    background: linear-gradient(135deg, #10b981, #059669);
     color: #fff;
-    font-weight: 700;
-    font-size: 12px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 2px solid #fff;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid #34d399;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
     z-index: 100000;
     pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     animation: popTooltip 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
@@ -1725,4 +1759,45 @@ h2 {
     color: #10b981 !important;
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.3) !important;
     transform: scale(1.05) !important;
+}
+
+/* 📡 Guide pulse initially showing the IP */
+.info-value.copyable.guide-pulse {
+    animation: ipGuidePulse 1.8s infinite ease-in-out;
+    border: 1px solid rgba(255, 183, 3, 0.6) !important;
+    background: rgba(255, 183, 3, 0.12) !important;
+}
+
+@keyframes ipGuidePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(255, 183, 3, 0);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 14px rgba(255, 183, 3, 0.35);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(255, 183, 3, 0);
+    }
+}
+
+/* 📜 Staggered entrance for rule items */
+.card#step-3.active .rule-item {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: ruleItemFadeIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.card#step-3.active .rule-item[data-rule="1"] { animation-delay: 0.1s; }
+.card#step-3.active .rule-item[data-rule="2"] { animation-delay: 0.2s; }
+.card#step-3.active .rule-item[data-rule="3"] { animation-delay: 0.3s; }
+.card#step-3.active .rule-item[data-rule="4"] { animation-delay: 0.4s; }
+.card#step-3.active .rule-item[data-rule="5"] { animation-delay: 0.5s; }
+
+@keyframes ruleItemFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
