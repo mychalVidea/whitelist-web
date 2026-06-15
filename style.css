@@ -860,7 +860,7 @@ h2 {
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     border-left: 3px solid transparent;
     opacity: 0.35;
-    filter: blur(1.2px);
+    cursor: default;
 }
 
 .rule-item span {
@@ -869,15 +869,8 @@ h2 {
     transition: all 0.4s ease;
 }
 
-.rule-item:not(.read):hover {
-    opacity: 0.7;
-    filter: blur(0);
-    transform: translateX(3px);
-}
-
 .rule-item.active {
     opacity: 1 !important;
-    filter: blur(0) !important;
     transform: translateX(6px) !important;
     background: rgba(255, 183, 3, 0.08) !important;
     border-left: 3px solid var(--accent) !important;
@@ -892,7 +885,6 @@ h2 {
 
 .rule-item.read {
     opacity: 0.65;
-    filter: blur(0);
     background: rgba(16, 185, 129, 0.04) !important;
     border-left: 3px solid var(--success-color) !important;
     transform: translateX(0) !important;
@@ -1832,7 +1824,7 @@ h2 {
 
 @keyframes ruleItemFadeIn {
     to {
-        opacity: 1;
+        opacity: 0.35;
         transform: translateY(0);
     }
 }

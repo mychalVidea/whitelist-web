@@ -783,8 +783,19 @@ function submitNick() {
     showMinecraftToast('Dosažen pokrok!', 'Přezdívka nastavena!', '🎮');
 }
 
-// Interactive rules confirm and progress indicator
+// State variables for automatic rules progression
+let rulesTimerInterval = null;
+let activeRuleIndex = 0;
+const RULE_READ_TIME = 4; // seconds per rule
+
+// Automated rules sequence and progress indicator
 function startRulesTimer() {
+    // Clear any existing timer interval
+    if (rulesTimerInterval) {
+        clearInterval(rulesTimerInterval);
+        rulesTimerInterval = null;
+    }
+
     const timerFill = document.getElementById('timer-fill');
     const timerText = document.getElementById('timer-text');
     const acceptBtn = document.getElementById('btn-accept-rules');
@@ -814,109 +825,148 @@ function startRulesTimer() {
     acceptBtn.disabled = true;
     if (lockIcon) lockIcon.style.display = 'inline-block';
     
-    const timerLabel = document.querySelector('.timer-label');
-    if (timerLabel) timerLabel.textContent = 'Kliknutím potvrď všechna pravidla...';
-    
     const rulesTimer = document.getElementById('rules-timer');
     if (rulesTimer) rulesTimer.style.opacity = '1';
     
-    updateRulesProgress();
+    activeRuleIndex = 0;
+    activateRule(activeRuleIndex);
 }
 
-// Update the progress circle and text based on checked rules
-function updateRulesProgress() {
-    const timerFill = document.getElementById('timer-fill');
-    const timerText = document.getElementById('timer-text');
-    const totalRules = document.querySelectorAll('.rule-item').length;
-    const readRules = document.querySelectorAll('.rule-item.read').length;
-
-    if (timerText) timerText.textContent = `${readRules}/${totalRules}`;
-    
-    if (timerFill) {
-        const percentage = (readRules / totalRules) * 100;
-        timerFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
+// Activates and counts down a single rule by index
+function activateRule(index) {
+    if (rulesTimerInterval) {
+        clearInterval(rulesTimerInterval);
+        rulesTimerInterval = null;
     }
 
+    const ruleItems = document.querySelectorAll('.rule-item');
+    const totalRules = ruleItems.length;
+
+    if (index >= totalRules) {
+        // All rules successfully read!
+        const acceptBtn = document.getElementById('btn-accept-rules');
+        const lockIcon = document.getElementById('btn-lock');
+        if (acceptBtn) acceptBtn.disabled = false;
+        if (lockIcon) lockIcon.style.display = 'none';
+        
+        const timerLabel = document.querySelector('.timer-label');
+        if (timerLabel) timerLabel.textContent = 'Pravidla přečtena! 🎉';
+        
+        const rulesTimer = document.getElementById('rules-timer');
+        if (rulesTimer) rulesTimer.style.opacity = '0.3';
+        
+        const timerFill = document.getElementById('timer-fill');
+        if (timerFill) timerFill.setAttribute('stroke-dasharray', '100, 100');
+        const timerText = document.getElementById('timer-text');
+        if (timerText) timerText.textContent = '✅';
+
+        play8bitSound('levelup');
+        triggerConfetti();
+        showMinecraftToast('Výzva splněna!', 'Pravidla přečtena! 📜', '📜');
+        
+        const firefly = document.getElementById('rules-firefly');
+        if (firefly) firefly.style.opacity = '0';
+        return;
+    }
+
+    // Set up active state
+    ruleItems.forEach((item, idx) => {
+        if (idx === index) {
+            item.classList.add('active');
+            item.classList.remove('read');
+        } else if (idx < index) {
+            item.classList.add('read');
+            item.classList.remove('active');
+        } else {
+            item.classList.remove('active');
+            item.classList.remove('read');
+        }
+    });
+
+    // Move guide firefly to the newly active rule item
     updateRulesFirefly();
+
+    const timerLabel = document.querySelector('.timer-label');
+    if (timerLabel) {
+        timerLabel.textContent = `Čtení pravidla ${index + 1} z ${totalRules}...`;
+    }
+
+    const timerFill = document.getElementById('timer-fill');
+    const timerText = document.getElementById('timer-text');
+
+    let elapsed = 0;
+    const intervalMs = 100; // update every 100ms for smooth progress
+    
+    if (timerText) {
+        timerText.textContent = RULE_READ_TIME;
+    }
+    if (timerFill) {
+        timerFill.setAttribute('stroke-dasharray', '0, 100');
+    }
+
+    rulesTimerInterval = setInterval(() => {
+        elapsed += intervalMs / 1000;
+        
+        const percentage = Math.min((elapsed / RULE_READ_TIME) * 100, 100);
+        if (timerFill) {
+            timerFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
+        }
+
+        const timeLeft = Math.max(Math.ceil(RULE_READ_TIME - elapsed), 0);
+        if (timerText) {
+            timerText.textContent = timeLeft;
+        }
+
+        if (elapsed >= RULE_READ_TIME) {
+            clearInterval(rulesTimerInterval);
+            rulesTimerInterval = null;
+
+            // Confirm current rule
+            const currentItem = ruleItems[index];
+            if (currentItem) {
+                currentItem.classList.remove('active');
+                currentItem.classList.add('read');
+                const iconSpan = currentItem.querySelector('.rule-icon');
+                if (iconSpan) iconSpan.textContent = '✅';
+                
+                play8bitSound(`note-${index + 1}`);
+                
+                // Spawn sparkles on this rule
+                const rect = currentItem.getBoundingClientRect();
+                spawnEpicSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            }
+
+            // Proceed to the next rule
+            activeRuleIndex = index + 1;
+            activateRule(activeRuleIndex);
+        }
+    }, intervalMs);
 }
 
-// Move guide firefly to the first unread rule item and manage active/inactive classes
+// Move guide firefly to the currently active rule item
 function updateRulesFirefly() {
     const firefly = document.getElementById('rules-firefly');
+    const activeItem = document.querySelector('.rule-item.active');
     
-    // Clear active class from all rule items
-    document.querySelectorAll('.rule-item').forEach(item => item.classList.remove('active'));
-
-    const firstUnread = document.querySelector('.rule-item:not(.read)');
-    if (firstUnread) {
-        firstUnread.classList.add('active');
-        if (firefly) {
-            const rect = firstUnread.getBoundingClientRect();
-            const containerRect = firstUnread.parentElement.getBoundingClientRect();
-            const topPos = rect.top - containerRect.top + rect.height / 2 - 3;
-            const leftPos = rect.left - containerRect.left - 15;
-            
-            firefly.style.opacity = '1';
-            firefly.style.top = `${topPos}px`;
-            firefly.style.left = `${leftPos}px`;
-        }
+    if (activeItem && firefly) {
+        const rect = activeItem.getBoundingClientRect();
+        const containerRect = activeItem.parentElement.getBoundingClientRect();
+        const topPos = rect.top - containerRect.top + rect.height / 2 - 3;
+        const leftPos = rect.left - containerRect.left - 15;
+        
+        firefly.style.opacity = '1';
+        firefly.style.top = `${topPos}px`;
+        firefly.style.left = `${leftPos}px`;
     } else {
         if (firefly) firefly.style.opacity = '0';
     }
 }
 
-// Attaches click and hover listeners to rules to confirm them individually with sound feedback
+// Attaches hover cursor configuration (no longer clickable)
 function setupRulesClicking() {
     document.querySelectorAll('.rule-item').forEach(item => {
-        item.style.cursor = 'pointer';
-        
-        // Hover tick sound to grab attention
-        item.addEventListener('mouseenter', () => {
-            if (!item.classList.contains('read')) {
-                play8bitSound('hover');
-            }
-        });
-        
-        item.addEventListener('click', () => {
-            if (item.classList.contains('read')) return;
-
-            const ruleIdx = parseInt(item.getAttribute('data-rule'));
-            item.classList.add('read');
-            
-            // Swap icon to checkmark
-            const iconSpan = item.querySelector('.rule-icon');
-            if (iconSpan) {
-                iconSpan.textContent = '✅';
-            }
-            
-            play8bitSound(`note-${ruleIdx}`);
-            
-            // Spawn fireworks sparkles on the clicked rule
-            const rect = item.getBoundingClientRect();
-            spawnEpicSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
-
-            updateRulesProgress();
-
-            const totalRules = document.querySelectorAll('.rule-item').length;
-            const readRules = document.querySelectorAll('.rule-item.read').length;
-
-            if (readRules === totalRules) {
-                const acceptBtn = document.getElementById('btn-accept-rules');
-                const lockIcon = document.getElementById('btn-lock');
-                if (acceptBtn) acceptBtn.disabled = false;
-                if (lockIcon) lockIcon.style.display = 'none';
-                
-                const timerLabel = document.querySelector('.timer-label');
-                if (timerLabel) timerLabel.textContent = 'Pravidla přečtena! 🎉';
-                
-                const rulesTimer = document.getElementById('rules-timer');
-                if (rulesTimer) rulesTimer.style.opacity = '0.3';
-
-                play8bitSound('levelup');
-                triggerConfetti();
-                showMinecraftToast('Výzva splněna!', 'Pravidla přečtena! 📜', '📜');
-            }
-        });
+        item.style.cursor = 'default';
+        // Hover and click listeners removed to make step non-interactive
     });
 }
 
