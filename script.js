@@ -60,8 +60,16 @@ initParticles();
 
 function animateParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const isMobile = window.innerWidth <= 768;
+
     for (let i = particlesArray.length - 1; i >= 0; i--) {
         const p = particlesArray[i];
+        
+        // Skip updating/drawing permanent background particles on mobile to save CPU/battery
+        if (isMobile && p instanceof Particle) {
+            continue;
+        }
+
         p.update();
         p.draw();
         // Remove temporary morph sparks once they fade out completely
