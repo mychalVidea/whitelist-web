@@ -450,7 +450,7 @@ function goBackToNick() {
     const timerFill = document.getElementById('timer-fill');
     if (timerFill) timerFill.setAttribute('stroke-dasharray', '0, 100');
     const timerText = document.getElementById('timer-text');
-    if (timerText) timerText.textContent = '10';
+    if (timerText) timerText.textContent = RULE_READ_TIME;
     const acceptBtn = document.getElementById('btn-accept-rules');
     if (acceptBtn) acceptBtn.disabled = true;
     const lockIcon = document.getElementById('btn-lock');
@@ -926,7 +926,7 @@ function activateRule(index) {
     const timerText = document.getElementById('timer-text');
 
     let elapsed = 0;
-    const intervalMs = 100; // update every 100ms for smooth progress
+    const intervalMs = 30; // update every 30ms for buttery-smooth progress animation
 
     if (timerText) {
         timerText.textContent = RULE_READ_TIME;
@@ -938,7 +938,14 @@ function activateRule(index) {
     rulesTimerInterval = setInterval(() => {
         elapsed += intervalMs / 1000;
 
-        const percentage = Math.min((elapsed / RULE_READ_TIME) * 100, 100);
+        const t = Math.min(elapsed / RULE_READ_TIME, 1);
+        // MrBeast ad-style progress curve where the speed (velocity) starts at 0,
+        // peaks early (around 12.5% of the duration), and then decays in a long tail.
+        // Mathematically, this is the integral of the rate curve: v(t) = c * t * (1 - t)^7
+        // Resulting in: p(t) = 1 + 8 * (1 - t)^9 - 9 * (1 - t)^8
+        const easedT = 1 + 8 * Math.pow(1 - t, 9) - 9 * Math.pow(1 - t, 8);
+        const percentage = easedT * 100;
+
         if (timerFill) {
             timerFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
         }
