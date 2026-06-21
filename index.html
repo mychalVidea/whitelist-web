@@ -119,6 +119,30 @@
                             </div>
                         </div>
                         <p class="nick-validation" id="nick-validation"></p>
+
+                        <!-- Premium toggle -->
+                        <div class="premium-toggle-section" id="premium-toggle-section">
+                            <div class="premium-toggle-header">
+                                <span class="premium-icon">💎</span>
+                                <div class="premium-toggle-text">
+                                    <span class="premium-label">Máš zakoupený Minecraft?</span>
+                                    <span class="premium-sublabel">Official launcher = zakoupený. TLauncher / Cracked = <strong>ne</strong>.</span>
+                                </div>
+                                <label class="toggle-switch" id="premium-label">
+                                    <input type="checkbox" id="premium-checkbox">
+                                    <span class="toggle-knob"></span>
+                                </label>
+                            </div>
+                            <div class="premium-info-box" id="premium-info-box">
+                                <span class="premium-info-icon">ℹ️</span>
+                                <div>
+                                    <strong>Co to znamená?</strong><br>
+                                    Pokud hraješ přes <strong>oficiální Minecraft Launcher</strong> (zakoupená hra) — zaškrtni <em>Ano</em>. Server tě pak automaticky přihlásí přes Mojang účet (plná bezpečnost).<br><br>
+                                    Pokud hraješ přes <strong>TLauncher, Cracked nebo jiný neoficiální launcher</strong> — nechej přepínač vypnutý. Budeš se přihlašovat pomocí hesla přímo na serveru.
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="source-select-group">
                             <label>Kde jsi se o našem Minecraft serveru dozvěděl? *</label>
                             <div class="source-grid" id="source-grid">
@@ -231,6 +255,11 @@
                             <div class="verify-step" id="vs-5">
                                 <div class="verify-spinner"></div>
                                 <span class="verify-label">Synchronizuji role a prefixy</span>
+                                <span class="verify-status"></span>
+                            </div>
+                            <div class="verify-step" id="vs-6" style="display:none;">
+                                <div class="verify-spinner"></div>
+                                <span class="verify-label">Aktivuji premium mód 💎</span>
                                 <span class="verify-status"></span>
                             </div>
                         </div>

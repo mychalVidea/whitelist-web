@@ -869,6 +869,7 @@ function selectSourceTile(tileElement) {
 }
 
 let selectedSource = '';
+let selectedPremium = false;
 
 // Set up listeners for MC Nick input and discovery source selection
 function setupInputListeners() {
@@ -885,6 +886,33 @@ function setupInputListeners() {
     // Reset visibility state on startup
     if (sourceGroup) {
         sourceGroup.classList.remove('visible');
+    }
+
+    // === Premium toggle setup ===
+    const premiumCheckbox = document.getElementById('premium-checkbox');
+    const premiumSection = document.getElementById('premium-toggle-section');
+    const premiumInfoBox = document.getElementById('premium-info-box');
+    const premiumHeader = document.querySelector('.premium-toggle-header');
+
+    if (premiumCheckbox && premiumSection) {
+        // Click on the header row (not just the toggle) toggles the checkbox
+        if (premiumHeader) {
+            premiumHeader.addEventListener('click', (e) => {
+                if (e.target.closest('.toggle-switch')) return; // let the label handle it natively
+                premiumCheckbox.checked = !premiumCheckbox.checked;
+                premiumCheckbox.dispatchEvent(new Event('change'));
+            });
+        }
+        premiumCheckbox.addEventListener('change', () => {
+            selectedPremium = premiumCheckbox.checked;
+            if (selectedPremium) {
+                premiumSection.classList.add('premium-active');
+                if (premiumInfoBox) premiumInfoBox.classList.add('visible');
+            } else {
+                premiumSection.classList.remove('premium-active');
+                if (premiumInfoBox) premiumInfoBox.classList.remove('visible');
+            }
+        });
     }
 
     let debounceTimeout;
@@ -1000,9 +1028,11 @@ function setupInputListeners() {
 function submitNick() {
     const input = document.getElementById('mc-nick-input');
     const select = document.getElementById('mc-source-select');
+    const premiumCheckbox = document.getElementById('premium-checkbox');
     if (!input || !select) return;
     selectedNick = input.value.trim();
     selectedSource = select.value;
+    selectedPremium = premiumCheckbox ? premiumCheckbox.checked : false;
     setStep(3, 'next');
     startRulesTimer();
 
@@ -1286,7 +1316,8 @@ async function runVerificationSteps() {
             },
             body: JSON.stringify({
                 minecraftNick: selectedNick,
-                discoverySource: selectedSource
+                discoverySource: selectedSource,
+                isPremium: selectedPremium
             })
         });
 
@@ -1339,6 +1370,17 @@ async function runVerificationSteps() {
             vs5.classList.remove('current');
             vs5.classList.add('done');
             vs5.querySelector('.verify-status').textContent = '✅';
+        }
+
+        // Step 6 (optional): Premium activation
+        const vs6 = document.getElementById('vs-6');
+        if (vs6 && selectedPremium) {
+            vs6.style.display = 'flex';
+            vs6.classList.add('current');
+            await delay(1200);
+            vs6.classList.remove('current');
+            vs6.classList.add('done');
+            vs6.querySelector('.verify-status').textContent = '💎';
         }
 
         // Success transition
