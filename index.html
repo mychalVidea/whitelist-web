@@ -12,7 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="mychalSMP.png">
+    <link rel="icon" type="image/png" href="assets/mychalSMP-SERVERICON-V2-NOEFF.png">
 </head>
 
 <body>
@@ -90,6 +90,9 @@
                             </svg>
                             Přihlásit se přes Discord
                         </button>
+                        <div class="no-discord-container" style="text-align: center; margin-top: 15px; margin-bottom: 5px;">
+                            <span class="no-discord-link" style="color: var(--text-muted, #a0aec0); font-size: 0.85rem; text-decoration: underline; cursor: pointer; transition: color 0.2s;" onclick="loginWithoutDiscord()">Pokračovat bez Discordu</span>
+                        </div>
                         <p class="hint">🔒 Tvé údaje jsou v bezpečí. Získáváme jen tvé jméno.</p>
                     </div>
                 </section>
@@ -102,7 +105,7 @@
                             <img id="discord-avatar" src="" alt="avatar" class="discord-avatar">
                             <div>
                                 <span class="discord-name" id="discord-name"></span>
-                                <span class="discord-verified">✅ Ověřený člen</span>
+                                <span class="discord-verified" id="discord-verified-status">✅ Ověřený člen</span>
                             </div>
                         </div>
                         <h2>Zadej svůj Minecraft nick</h2>

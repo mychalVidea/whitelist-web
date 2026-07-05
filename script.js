@@ -750,6 +750,27 @@ async function startDiscordLogin() {
     }
 }
 
+async function loginWithoutDiscord() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/whitelist/no-discord-login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+            sessionToken = data.token;
+            localStorage.setItem('whitelist_token', sessionToken);
+            await verifyUserSession();
+        } else {
+            throw new Error(data.message || 'Nelze provést registraci bez Discordu.');
+        }
+    } catch (err) {
+        showError(err.message || 'Chyba při komunikaci s API.');
+    }
+}
+
 // App lifecycle init
 window.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
@@ -817,15 +838,40 @@ async function verifyUserSession() {
             // Fill step 2 UI details
             const avatar = document.getElementById('discord-avatar');
             const nameSpan = document.getElementById('discord-name');
+            const verifiedStatus = document.getElementById('discord-verified-status');
+            
             if (avatar) avatar.src = data.discordAvatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
             if (nameSpan) nameSpan.textContent = discordUsername;
+
+            const isNoDiscord = discordId && discordId.startsWith('nodiscord_');
+            if (isNoDiscord) {
+                if (verifiedStatus) {
+                    verifiedStatus.textContent = '⚠️ Bez Discordu';
+                    verifiedStatus.className = 'discord-verified';
+                    verifiedStatus.style.background = 'rgba(235, 141, 19, 0.15)';
+                    verifiedStatus.style.color = '#eb8d13';
+                    verifiedStatus.style.borderColor = 'rgba(235, 141, 19, 0.3)';
+                }
+            } else {
+                if (verifiedStatus) {
+                    verifiedStatus.textContent = '✅ Ověřený člen';
+                    verifiedStatus.className = 'discord-verified';
+                    verifiedStatus.style.background = '';
+                    verifiedStatus.style.color = '';
+                    verifiedStatus.style.borderColor = '';
+                }
+            }
 
             // Check if already has whitelist
             if (data.alreadyWhitelisted) {
                 showSuccessState(true, data.existingNick);
             } else {
                 setStep(2);
-                showMinecraftToast('Dosažen pokrok!', 'Účet Discord propojen!', '💬');
+                if (isNoDiscord) {
+                    showMinecraftToast('Dosažen pokrok!', 'Účet vytvořen!', '🎮');
+                } else {
+                    showMinecraftToast('Dosažen pokrok!', 'Účet Discord propojen!', '💬');
+                }
             }
         } else {
             throw new Error(data.message || 'Nepodařilo se ověřit uživatele.');
