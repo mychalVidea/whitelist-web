@@ -789,8 +789,8 @@ window.addEventListener('DOMContentLoaded', async () => {
             const inviteUrl = params.get('invite') || 'https://discord.gg/875027587477409862';
             showDiscordInviteError(inviteUrl);
         } else if (paramError === 'joined_too_recently') {
-            const minutesLeft = params.get('minutes_left') || '30';
-            showError(`Na našem Discord serveru musíš být alespoň 30 minut, než se můžeš zapsat na whitelist. Počkej prosím ještě ${minutesLeft} minut.`);
+            const minutesLeft = params.get('minutes_left') || '15';
+            showError(`Na našem Discord serveru musíš být alespoň 15 minut, než se můžeš zapsat na whitelist. Počkej prosím ještě ${minutesLeft} minut.`);
         } else {
             showError('Ověření přes Discord selhalo.');
         }
